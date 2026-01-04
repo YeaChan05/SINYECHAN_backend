@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read Java version from SDKMAN
+        id: sdkman
+        shell: bash
+        run: |
+          if [ ! -f .sdkmanrc ]; then
+            echo ".sdkmanrc not found" >&2
+            exit 1
+          fi
+          echo "java_version=$(grep '^java=' .sdkmanrc | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Setup SDKMAN Java
+        uses: sdkman/sdkman-action@v1
+        with:
+          candidate: java
+          version: ${{ steps.sdkman.outputs.java_version }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build
+        run: ./gradlew build -x test
+
+      - name: Unit tests
+        run: ./gradlew test
+
+      - name: Integration tests
+        run: ./gradlew integrationTest
+
+      # 커버리지 검사는 통합해서 한번만 실행해도 충분
+      - name: Kover XML report
+        run: ./gradlew :aggregate:koverXmlReport
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5.5.2
+        with:
+          files: "aggregate/build/reports/kover/report.xml"
