@@ -84,6 +84,14 @@ configureByTypePrefix("java") {
         integrationTestImplementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.20.4"))
         integrationTestImplementation("org.testcontainers:junit-jupiter")
         integrationTestImplementation("org.testcontainers:testcontainers")
+
+        implementation(rootProject.libs.jspecify)
+//        compileOnly(rootProject.libs.lombok)
+//        annotationProcessor(rootProject.libs.lombok)
+//        testCompileOnly(rootProject.libs.lombok)
+//        testAnnotationProcessor(rootProject.libs.lombok)
+//        integrationTestCompileOnly(rootProject.libs.lombok)
+//        integrationTestAnnotationProcessor(rootProject.libs.lombok)
     }
 }
 
