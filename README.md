@@ -6,6 +6,7 @@
 - [코드 컨벤션](docs/rule/code_convention.md)
 - [모듈 구조](docs/rule/module.md)
 - [의존성 규칙](docs/rule/dependencies.md)
+- [외부 라이브러리|오픈소스](docs/opensource.md)
 
 ## API 요약
 - 계좌 등록/삭제
