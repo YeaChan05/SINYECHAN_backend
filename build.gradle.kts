@@ -72,6 +72,9 @@ configureByTypePrefix("java") {
         extendsFrom(configurations.testImplementation.get())
     }
 
+    val integrationTestCompileOnly by configurations.getting
+    val integrationTestAnnotationProcessor by configurations.getting
+
     tasks {
         val check by getting {
             dependsOn("integrationTest")
