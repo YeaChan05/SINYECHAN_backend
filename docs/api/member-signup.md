@@ -14,7 +14,9 @@ POST /members
 Content-Type: application/json
 
 {
-  "name": "홍길동"
+  "name": "홍길동",
+  "email": "test@test.com",
+  "password": "password1!"
 }
 ```
 
