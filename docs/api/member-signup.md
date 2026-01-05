@@ -25,9 +25,18 @@ Content-Type: application/json
 - body
   - `name`: 등록된 회원 이름 (문자열)
 
-
 ```json
 {
   "name": "홍길동"
 }
 ```
+
+## error
+- status: `400 Bad Request`
+- context
+  - `email` is invalid 
+  - `password` is invalid
+
+- status: `500 Internal Server Error`
+- context 
+  - duplicate email
