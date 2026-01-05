@@ -6,20 +6,30 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "member")
-class MemberEntity extends BaseEntity implements MemberModel {
+public class MemberEntity extends BaseEntity implements MemberModel {
 
   @Column(nullable = false)
   private String name;
+  @Column(nullable = false, unique = true)
+  private String email;
+  @Column(nullable = false)
+  private String passwordHash;
 
   protected MemberEntity() {
   }
 
-  private MemberEntity(String name) {
+  private MemberEntity(String name, String email, String passwordHash) {
     this.name = name;
+    this.email = email;
+    this.passwordHash = passwordHash;
   }
 
-  static MemberEntity create(String name) {
-    return new MemberEntity(name);
+  static MemberEntity create(MemberProps props) {
+    return new MemberEntity(
+        props.name(),
+        props.email(),
+        props.password()
+    );
   }
 
   @Override
@@ -30,5 +40,15 @@ class MemberEntity extends BaseEntity implements MemberModel {
   @Override
   public String name() {
     return this.name;
+  }
+
+  @Override
+  public String email() {
+    return this.email;
+  }
+
+  @Override
+  public String password() {
+    return this.passwordHash;
   }
 }
