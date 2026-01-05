@@ -2,6 +2,7 @@ package org.yechan.remittance.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -60,7 +61,7 @@ public class PostSpecs {
   @ValueSource(strings = {"", "pswd1!", "password", "password1", "password!", "12345678!"})
   void registerMemberWithInvalidPassword(
       String password
-  ){
+  ) {
     // Arrange
     var request = new MemberRegisterRequest("test", VALID_EMAIL, password);
 
@@ -70,5 +71,28 @@ public class PostSpecs {
         .body(request)
         .exchange()
         .expectStatus().isBadRequest();
+  }
+
+  @Test
+  void registerMemberWithDuplicatedEmail() {
+    // Arrange
+    var request = new MemberRegisterRequest("test", VALID_EMAIL, VALID_PASSWORD);
+
+    restTestClient.post()
+        .uri("/members")
+        .body(new MemberRegisterRequest("test", VALID_EMAIL, VALID_PASSWORD))
+        .exchange()
+        .expectStatus().isOk();
+
+    // Act & Assert
+    restTestClient.post()
+        .uri("/members")
+        .body(new MemberRegisterRequest("test", VALID_EMAIL, VALID_PASSWORD))
+        .exchange()
+        .expectStatus().is5xxServerError()
+        .expectBody(String.class)
+        .consumeWith(res ->
+            assertThat(Objects.requireNonNull(res.getResponseBody()))
+                .contains(("Email already exists:")));
   }
 }
