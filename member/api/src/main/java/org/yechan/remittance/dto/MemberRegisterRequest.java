@@ -1,6 +1,7 @@
 package org.yechan.remittance.dto;
 
 import jakarta.validation.constraints.Pattern;
+import org.yechan.remittance.MemberProps;
 
 public record MemberRegisterRequest(String name,
 
@@ -13,6 +14,6 @@ public record MemberRegisterRequest(String name,
                                     @Pattern(
                                         regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*])[a-zA-Z\\d!@#$%^&*]{8,}$",
                                         message = "Invalid password format. Password must contain at least one letter, one number, and one special character.")
-                                    String password) {
+                                    String password) implements MemberProps {
 
 }
