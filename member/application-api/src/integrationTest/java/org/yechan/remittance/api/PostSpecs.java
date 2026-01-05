@@ -55,4 +55,20 @@ public class PostSpecs {
         .exchange()
         .expectStatus().isBadRequest();
   }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "pswd1!", "password", "password1", "password!", "12345678!"})
+  void registerMemberWithInvalidPassword(
+      String password
+  ){
+    // Arrange
+    var request = new MemberRegisterRequest("test", VALID_EMAIL, password);
+
+    // Act & Assert
+    restTestClient.post()
+        .uri("/members")
+        .body(request)
+        .exchange()
+        .expectStatus().isBadRequest();
+  }
 }
