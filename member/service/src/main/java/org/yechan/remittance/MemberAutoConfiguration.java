@@ -5,8 +5,11 @@ import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
 class MemberAutoConfiguration {
+
   @Bean
-  MemberCreateUseCase memberCreateUseCase(MemberRepository memberRepository) {
-    return new MemberService(memberRepository);
+  MemberCreateUseCase memberCreateUseCase(
+      MemberRepository memberRepository,
+      PasswordHashEncoder passwordHashEncoder) {
+    return new MemberService(memberRepository, passwordHashEncoder);
   }
 }
