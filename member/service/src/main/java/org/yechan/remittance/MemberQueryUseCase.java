@@ -31,6 +31,7 @@ class MemberQueryService implements MemberQueryUseCase {
       throw new MemberPermissionDeniedException(AUTHENTICATION_FAILED, "Invalid credentials");
     }
 
-    return tokenGenerator.generate(member.memberId());
+    var token = tokenGenerator.generate(member.memberId());
+    return new MemberTokenValue(token.accessToken(), token.refreshToken(), token.expiresIn());
   }
 }
