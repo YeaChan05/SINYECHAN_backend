@@ -1,4 +1,6 @@
 spring:
+  autoconfigure:
+    exclude: org.springframework.boot.security.autoconfigure.actuate.web.servlet.ManagementWebSecurityAutoConfiguration
   datasource:
     url: jdbc:tc:mysql:8.0.36:///aggregate
     username: aggregate
