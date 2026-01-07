@@ -40,7 +40,7 @@ record AccountController(
   }
 
   private record AccountCreateCommand(
-      long memberId,
+      Long memberId,
       String bankCode,
       String accountNumber,
       String accountName

@@ -85,7 +85,7 @@ class AccountDeleteServiceIntegrationTest {
   private record TestDeleteProps(long memberId, long accountId) implements AccountDeleteProps {
   }
 
-  private record TestAccount(long memberId, Long accountId) implements AccountModel {
+  private record TestAccount(Long memberId, Long accountId) implements AccountModel {
     @Override
     public String bankCode() {
       return "001";

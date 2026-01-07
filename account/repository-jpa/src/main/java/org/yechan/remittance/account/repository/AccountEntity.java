@@ -48,7 +48,7 @@ public class AccountEntity extends BaseEntity implements AccountModel {
   }
 
   @Override
-  public long memberId() {
+  public Long memberId() {
     return memberId;
   }
 

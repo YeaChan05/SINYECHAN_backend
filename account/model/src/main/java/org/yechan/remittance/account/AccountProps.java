@@ -2,7 +2,7 @@ package org.yechan.remittance.account;
 
 public interface AccountProps {
 
-  long memberId();
+  Long memberId();
 
   String bankCode();
 
