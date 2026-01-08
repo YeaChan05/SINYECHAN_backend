@@ -1,5 +1,6 @@
 package org.yechan.remittance.transfer.repository;
 
+import com.github.f4b6a3.tsid.TsidCreator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -58,9 +59,9 @@ public class OutboxEventEntity implements OutboxEventModel {
     this.createdAt = createdAt;
   }
 
-  static OutboxEventEntity create(OutboxEventProps props, String eventId) {
+  static OutboxEventEntity create(OutboxEventProps props) {
     return new OutboxEventEntity(
-        eventId,
+        TsidCreator.getTsid().toString(),
         props.aggregateType(),
         props.aggregateId(),
         props.eventType(),
