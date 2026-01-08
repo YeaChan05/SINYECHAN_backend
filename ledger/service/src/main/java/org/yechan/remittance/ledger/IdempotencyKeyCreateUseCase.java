@@ -68,5 +68,35 @@ class IdempotencyKeyService implements IdempotencyKeyCreateUseCase {
     public Instant expiresAt() {
       return now.plus(expiresIn);
     }
+
+    @Override
+    public IdempotencyScopeValue scope() {
+      return IdempotencyScopeValue.TRANSFER;
+    }
+
+    @Override
+    public IdempotencyKeyStatusValue status() {
+      return IdempotencyKeyStatusValue.BEFORE_START;
+    }
+
+    @Override
+    public String requestHash() {
+      return null;
+    }
+
+    @Override
+    public String responseSnapshot() {
+      return null;
+    }
+
+    @Override
+    public Instant startedAt() {
+      return null;
+    }
+
+    @Override
+    public Instant completedAt() {
+      return null;
+    }
   }
 }

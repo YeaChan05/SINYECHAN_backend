@@ -6,20 +6,19 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
+import org.yechan.remittance.ledger.IdempotencyKeyProps.IdempotencyKeyStatusValue;
+import org.yechan.remittance.ledger.IdempotencyKeyProps.IdempotencyScopeValue;
 
 class IdempotencyKeyServiceTest {
 
   @Test
   void createsIdempotencyKeyWithExpiration() {
     var saved = new AtomicReference<IdempotencyKeyProps>();
-    IdempotencyKeyRepository repository = props -> {
-      saved.set(props);
-      return new IdempotencyKey(saved.get().memberId(), props.memberId(), props.idempotencyKey(),
-          props.expiresAt());
-    };
-    Instant now = Instant.parse("2024-01-01T00:00:00Z");
+    IdempotencyKeyRepository repository = new TestIdempotencyKeyRepository(saved);
+    Instant now = Instant.parse("2026-01-01T00:00:00Z");
     Clock clock = Clock.fixed(now, ZoneOffset.UTC);
     var properties = new IdempotencyKeyProperties(Duration.ofHours(1));
     var service = new IdempotencyKeyService(repository, clock, properties);
@@ -29,7 +28,89 @@ class IdempotencyKeyServiceTest {
     assertThat(created.memberId()).isEqualTo(10L);
     assertThat(created.idempotencyKey()).isNotBlank();
     assertThat(created.expiresAt()).isEqualTo(now.plus(Duration.ofHours(1)));
+    assertThat(created.scope()).isEqualTo(IdempotencyKeyProps.IdempotencyScopeValue.TRANSFER);
+    assertThat(created.status()).isEqualTo(IdempotencyKeyStatusValue.BEFORE_START);
+    assertThat(created.requestHash()).isNull();
+    assertThat(created.responseSnapshot()).isNull();
+    assertThat(created.startedAt()).isNull();
+    assertThat(created.completedAt()).isNull();
     assertThat(saved.get()).isNotNull();
     assertThat(saved.get().idempotencyKey()).isEqualTo(created.idempotencyKey());
   }
+
+  private record TestIdempotencyKeyRepository(AtomicReference<IdempotencyKeyProps> saved) implements
+      IdempotencyKeyRepository {
+
+    @Override
+      public IdempotencyKeyModel save(IdempotencyKeyProps props) {
+        saved.set(props);
+        return new IdempotencyKey(
+            saved.get().memberId(),
+            props.memberId(),
+            props.idempotencyKey(),
+            props.expiresAt(),
+            props.scope(),
+            props.status(),
+            props.requestHash(),
+            props.responseSnapshot(),
+            props.startedAt(),
+            props.completedAt()
+        );
+      }
+
+      @Override
+      public Optional<IdempotencyKeyModel> findByMemberIdAndIdempotencyKey(
+          Long memberId,
+          String idempotencyKey
+      ) {
+        return Optional.empty();
+      }
+
+      @Override
+      public Optional<IdempotencyKeyModel> findByKey(
+          Long memberId,
+          IdempotencyScopeValue scope,
+          String idempotencyKey
+      ) {
+        return Optional.empty();
+      }
+
+      @Override
+      public boolean tryMarkInProgress(
+          Long memberId,
+          IdempotencyScopeValue scope,
+          String idempotencyKey,
+          String requestHash,
+          Instant startedAt
+      ) {
+        return false;
+      }
+
+      @Override
+      public IdempotencyKeyModel markSucceeded(
+          Long memberId,
+          IdempotencyScopeValue scope,
+          String idempotencyKey,
+          String responseSnapshot,
+          Instant completedAt
+      ) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public IdempotencyKeyModel markFailed(
+          Long memberId,
+          IdempotencyScopeValue scope,
+          String idempotencyKey,
+          String responseSnapshot,
+          Instant completedAt
+      ) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public int markTimeoutBefore(Instant cutoff, String responseSnapshot) {
+        return 0;
+      }
+    }
 }

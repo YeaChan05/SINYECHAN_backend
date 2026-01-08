@@ -8,7 +8,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.yechan.remittance.ledger.IdempotencyKeyRepository;
 
 @AutoConfiguration(before = DataJpaRepositoriesAutoConfiguration.class)
-@EntityScan(basePackageClasses = IdempotencyKeyEntity.class)
+@EntityScan(basePackageClasses = {
+    IdempotencyKeyEntity.class,
+    TransferEntity.class,
+    OutboxEventEntity.class
+})
 @EnableJpaRepositories(basePackageClasses = IdempotencyKeyJpaRepository.class)
 public class IdempotencyKeyRepositoryAutoConfiguration {
 
