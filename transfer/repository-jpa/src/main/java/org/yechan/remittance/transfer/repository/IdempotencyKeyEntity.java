@@ -1,0 +1,133 @@
+package org.yechan.remittance.transfer.repository;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import java.time.Instant;
+import org.yechan.remittance.BaseEntity;
+import org.yechan.remittance.transfer.IdempotencyKeyModel;
+import org.yechan.remittance.transfer.IdempotencyKeyProps;
+
+@Entity
+@Table(
+    name = "idempotency_key",
+    schema = "integration",
+    uniqueConstraints =
+    @UniqueConstraint(
+        name = "uk_idempotency_key_client_scope",
+        columnNames = {"client_id", "scope", "idempotency_key"}
+    )
+)
+public class IdempotencyKeyEntity extends BaseEntity implements IdempotencyKeyModel {
+
+  @Column(name = "client_id", nullable = false)
+  private Long memberId;
+
+  @Column(name = "idempotency_key", nullable = false)
+  private String idempotencyKey;
+
+  @Column(nullable = false)
+  private Instant expiresAt;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "scope", nullable = false)
+  private IdempotencyScopeValue scope;
+
+  @Enumerated(EnumType.STRING)
+  @Column
+  private IdempotencyKeyStatusValue status;
+
+  @Column
+  private String requestHash;
+
+  @Column
+  private String responseSnapshot;
+
+  @Column
+  private Instant startedAt;
+
+  @Column
+  private Instant completedAt;
+
+  protected IdempotencyKeyEntity() {
+  }
+
+  private IdempotencyKeyEntity(
+      Long memberId,
+      String idempotencyKey,
+      Instant expiresAt,
+      IdempotencyScopeValue scope
+  ) {
+    this.memberId = memberId;
+    this.idempotencyKey = idempotencyKey;
+    this.expiresAt = expiresAt;
+    this.scope = scope;
+    this.status = IdempotencyKeyStatusValue.BEFORE_START;
+    this.requestHash = null;
+    this.responseSnapshot = null;
+    this.startedAt = null;
+    this.completedAt = null;
+  }
+
+  static IdempotencyKeyEntity create(IdempotencyKeyProps props) {
+    return new IdempotencyKeyEntity(
+        props.memberId(),
+        props.idempotencyKey(),
+        props.expiresAt(),
+        props.scope()
+    );
+  }
+
+  @Override
+  public Long memberId() {
+    return memberId;
+  }
+
+  @Override
+  public String idempotencyKey() {
+    return idempotencyKey;
+  }
+
+  @Override
+  public Instant expiresAt() {
+    return expiresAt;
+  }
+
+  @Override
+  public IdempotencyScopeValue scope() {
+    return scope;
+  }
+
+  @Override
+  public IdempotencyKeyStatusValue status() {
+    return status;
+  }
+
+  @Override
+  public String requestHash() {
+    return requestHash;
+  }
+
+  @Override
+  public String responseSnapshot() {
+    return responseSnapshot;
+  }
+
+  @Override
+  public Instant startedAt() {
+    return startedAt;
+  }
+
+  @Override
+  public Instant completedAt() {
+    return completedAt;
+  }
+
+  @Override
+  public Long idempotencyKeyId() {
+    return super.getId();
+  }
+}

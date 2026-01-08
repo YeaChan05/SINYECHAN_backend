@@ -9,7 +9,7 @@
 
 도메인 데이터는 `core` 스키마에 두고, 멱등/이벤트 데이터는 `integration` 스키마로 분리한다.
 
-- `core`: `account`, `ledger` 등 도메인 테이블
+- `core`: `account`, `transfer` 등 도메인 테이블
 - `integration`: `idempotency_key`, `outbox_events`, `processed_events`
 
 ### `integration.idempotency_key`
@@ -130,7 +130,7 @@ WHERE client_id = ?
 4. 원장 기록
 
     - transferId 생성
-    - ledger insert
+    - transfer insert
     - `transferId UNIQUE` (최종 중복 방어)
 5. outbox 적재
 
@@ -280,3 +280,4 @@ CREATE TABLE integration.processed_events (
   processed_at DATETIME(6) NOT NULL
 );
 ```
+s

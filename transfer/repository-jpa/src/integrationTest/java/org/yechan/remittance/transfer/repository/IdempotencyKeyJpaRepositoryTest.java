@@ -1,0 +1,236 @@
+package org.yechan.remittance.transfer.repository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import jakarta.persistence.EntityManager;
+import java.time.Duration;
+import java.time.Instant;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestConstructor;
+import org.yechan.remittance.transfer.IdempotencyKeyProps;
+import org.yechan.remittance.transfer.IdempotencyKeyProps.IdempotencyKeyStatusValue;
+import org.yechan.remittance.transfer.IdempotencyKeyProps.IdempotencyScopeValue;
+
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(IdempotencyKeyRepositoryAutoConfiguration.class)
+@ContextConfiguration(classes = TestApplication.class)
+@TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
+class IdempotencyKeyJpaRepositoryTest {
+
+  private final IdempotencyKeyJpaRepository repository;
+  private final EntityManager entityManager;
+
+  @Autowired
+  IdempotencyKeyJpaRepositoryTest(
+      IdempotencyKeyJpaRepository repository,
+      EntityManager entityManager
+  ) {
+    this.repository = repository;
+    this.entityManager = entityManager;
+  }
+
+  @Test
+  void markInProgressUpdatesOnlyWhenBeforeStart() {
+    Instant now = Instant.parse("2026-01-01T00:00:00Z");
+    IdempotencyKeyEntity saved = saveIdempotencyKey(now, 10L, "idem-key");
+    flushClear();
+
+    int updated = repository.markInProgress(
+        saved.memberId(),
+        IdempotencyScopeValue.TRANSFER,
+        saved.idempotencyKey(),
+        "hash",
+        now
+    );
+    flushClear();
+
+    assertThat(updated).isEqualTo(1);
+    var found = repository.findByMemberIdAndScopeAndIdempotencyKey(
+        saved.memberId(),
+        IdempotencyScopeValue.TRANSFER,
+        saved.idempotencyKey()
+    );
+    assertThat(found).isPresent();
+    assertThat(found.get().status()).isEqualTo(IdempotencyKeyStatusValue.IN_PROGRESS);
+    assertThat(found.get().requestHash()).isEqualTo("hash");
+    assertThat(found.get().startedAt()).isEqualTo(now);
+
+    int secondUpdate = repository.markInProgress(
+        saved.memberId(),
+        IdempotencyScopeValue.TRANSFER,
+        saved.idempotencyKey(),
+        "hash-2",
+        now.plusSeconds(30)
+    );
+    assertThat(secondUpdate).isZero();
+  }
+
+  @Test
+  void markSucceededUpdatesSnapshotAndCompletedAt() {
+    Instant now = Instant.parse("2026-01-02T00:00:00Z");
+    IdempotencyKeyEntity saved = saveIdempotencyKey(now, 20L, "idem-succeed");
+    flushClear();
+
+    repository.markInProgress(
+        saved.memberId(),
+        IdempotencyScopeValue.TRANSFER,
+        saved.idempotencyKey(),
+        "hash",
+        now
+    );
+    repository.markSucceeded(
+        saved.memberId(),
+        IdempotencyScopeValue.TRANSFER,
+        saved.idempotencyKey(),
+        "{\"status\":\"SUCCEEDED\"}",
+        now.plusSeconds(30)
+    );
+    flushClear();
+
+    var found = repository.findByMemberIdAndScopeAndIdempotencyKey(
+        saved.memberId(),
+        IdempotencyScopeValue.TRANSFER,
+        saved.idempotencyKey()
+    );
+    assertThat(found).isPresent();
+    assertThat(found.get().status()).isEqualTo(IdempotencyKeyStatusValue.SUCCEEDED);
+    assertThat(found.get().responseSnapshot()).contains("SUCCEEDED");
+    assertThat(found.get().completedAt()).isEqualTo(now.plusSeconds(30));
+  }
+
+  @Test
+  void markFailedUpdatesSnapshotAndCompletedAt() {
+    Instant now = Instant.parse("2026-01-03T00:00:00Z");
+    IdempotencyKeyEntity saved = saveIdempotencyKey(now, 30L, "idem-failed");
+    flushClear();
+
+    repository.markInProgress(
+        saved.memberId(),
+        IdempotencyScopeValue.TRANSFER,
+        saved.idempotencyKey(),
+        "hash",
+        now
+    );
+    repository.markFailed(
+        saved.memberId(),
+        IdempotencyScopeValue.TRANSFER,
+        saved.idempotencyKey(),
+        "{\"status\":\"FAILED\"}",
+        now.plusSeconds(10)
+    );
+    flushClear();
+
+    var found = repository.findByMemberIdAndScopeAndIdempotencyKey(
+        saved.memberId(),
+        IdempotencyScopeValue.TRANSFER,
+        saved.idempotencyKey()
+    );
+    assertThat(found).isPresent();
+    assertThat(found.get().status()).isEqualTo(IdempotencyKeyStatusValue.FAILED);
+    assertThat(found.get().responseSnapshot()).contains("FAILED");
+    assertThat(found.get().completedAt()).isEqualTo(now.plusSeconds(10));
+  }
+
+  private void flushClear() {
+    entityManager.flush();
+    entityManager.clear();
+  }
+
+  @Test
+  void markTimeoutBeforeMovesOldInProgressToTimeout() {
+    Instant now = Instant.parse("2026-01-04T00:00:00Z");
+    IdempotencyKeyEntity saved = saveIdempotencyKey(now, 40L, "idem-timeout");
+    flushClear();
+
+    repository.markInProgress(
+        saved.memberId(),
+        IdempotencyScopeValue.TRANSFER,
+        saved.idempotencyKey(),
+        "hash",
+        now.minus(Duration.ofMinutes(10))
+    );
+    flushClear();
+
+    int updated = repository.markTimeoutBefore(
+        now.minus(Duration.ofMinutes(5)),
+        "{\"status\":\"FAILED\",\"error_code\":\"TIMEOUT\"}",
+        now
+    );
+    flushClear();
+
+    assertThat(updated).isEqualTo(1);
+    var found = repository.findByMemberIdAndScopeAndIdempotencyKey(
+        saved.memberId(),
+        IdempotencyScopeValue.TRANSFER,
+        saved.idempotencyKey()
+    );
+    assertThat(found).isPresent();
+    assertThat(found.get().status()).isEqualTo(IdempotencyKeyStatusValue.TIMEOUT);
+    assertThat(found.get().responseSnapshot()).contains("TIMEOUT");
+  }
+
+  private IdempotencyKeyEntity saveIdempotencyKey(
+      Instant now,
+      Long memberId,
+      String idempotencyKey
+  ) {
+    return repository.save(
+        IdempotencyKeyEntity.create(new TestIdempotencyKeyProps(memberId, idempotencyKey, now)));
+  }
+
+  private record TestIdempotencyKeyProps(
+      Long memberId, String idempotencyKey, Instant now
+  ) implements IdempotencyKeyProps {
+
+    @Override
+    public Long memberId() {
+      return memberId;
+    }
+
+    @Override
+    public String idempotencyKey() {
+      return idempotencyKey;
+    }
+
+    @Override
+    public Instant expiresAt() {
+      return now.plus(Duration.ofMinutes(20));
+    }
+
+    @Override
+    public IdempotencyScopeValue scope() {
+      return IdempotencyScopeValue.TRANSFER;
+    }
+
+    @Override
+    public IdempotencyKeyStatusValue status() {
+      return null;
+    }
+
+    @Override
+    public String requestHash() {
+      return null;
+    }
+
+    @Override
+    public String responseSnapshot() {
+      return null;
+    }
+
+    @Override
+    public Instant startedAt() {
+      return null;
+    }
+
+    @Override
+    public Instant completedAt() {
+      return null;
+    }
+  }
+}

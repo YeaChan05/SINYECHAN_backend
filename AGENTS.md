@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- Gradle 멀티모듈 구조이며 루트에 `account`, `ledger`, `common`, `aggregate` 모듈이 있습니다.
+- Gradle 멀티모듈 구조이며 루트에 `account`, `transfer`, `common`, `aggregate` 모듈이 있습니다.
 - 도메인 모듈은 `model`, `infrastructure`, `service`, `exception`, `api`, `repository-{type}`, `application-{type}`로 구성합니다.
 - `repository-{type}`은 `jpa|jdbc|mongo` 등 저장 방식에 따라 분기합니다.
 - `application-{type}`은 실행/조립 모듈로 `api|batch` 등으로 분기합니다.

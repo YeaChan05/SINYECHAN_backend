@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 import org.yechan.remittance.EmailGenerator;
 import org.yechan.remittance.PasswordGenerator;
 import org.yechan.remittance.TokenVerifier;
-import org.yechan.remittance.ledger.dto.IdempotencyKeyCreateResponse;
+import org.yechan.remittance.transfer.dto.IdempotencyKeyCreateResponse;
 import org.yechan.remittance.member.application.AggregateApplication;
 import org.yechan.remittance.member.dto.MemberLoginRequest;
 import org.yechan.remittance.member.dto.MemberLoginResponse;

@@ -4,8 +4,8 @@ dependencies {
     implementation(project(":account:api"))
     implementation(project(":account:repository-jpa"))
 
-    implementation(project(":ledger:api"))
-    implementation(project(":ledger:repository-jpa"))
+    implementation(project(":transfer:api"))
+    implementation(project(":transfer:repository-jpa"))
 
     implementation(project(":member:api"))
     implementation(project(":member:repository-jpa"))
