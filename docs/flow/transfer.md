@@ -7,9 +7,12 @@
 
 ## 0. 데이터 모델 전제
 
-모든 멱등/이벤트 데이터는 `integration` 스키마에서 관리한다.
+도메인 데이터는 `core` 스키마에 두고, 멱등/이벤트 데이터는 `integration` 스키마로 분리한다.
 
-### `integration.idempotency_requests`
+- `core`: `account`, `ledger` 등 도메인 테이블
+- `integration`: `idempotency_key`, `outbox_events`, `processed_events`
+
+### `integration.idempotency_key`
 
 - `(client_id, scope, idempotency_key)` UNIQUE
 - `status`: `IN_PROGRESS | SUCCEEDED | FAILED`
@@ -63,11 +66,17 @@
 
 ## 3. 멱등 레코드 선점 (트랜잭션 A)
 
-### INSERT 시도
+### 선점 시도
 
 ```sql
-INSERT INTO idempotency_requests (...)
-VALUES (..., IN_PROGRESS, request_hash, now())
+UPDATE idempotency_key
+SET status = 'IN_PROGRESS',
+    request_hash = ?,
+    started_at = now()
+WHERE client_id = ?
+  AND scope = ?
+  AND idempotency_key = ?
+  AND status IS NULL;
 ```
 
 ---
@@ -164,7 +173,7 @@ VALUES (..., IN_PROGRESS, request_hash, now())
 - 주기 실행(예: 1분)
 
 ```sql
-UPDATE idempotency_requests
+UPDATE idempotency_key
 SET status = 'FAILED',
     completed_at = now(),
     error_code = 'TIMEOUT'
@@ -224,3 +233,50 @@ LIMIT N;
 - FAILED 비율
 - outbox backlog 크기
 
+---
+
+## 10. integration 스키마(DDL)
+
+### 10-1. idempotency_key
+
+```sql
+CREATE TABLE integration.idempotency_key (
+  idempotency_key_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  client_id BIGINT NOT NULL,
+  scope VARCHAR(50) NOT NULL,
+  idempotency_key CHAR(36) NOT NULL,
+  status VARCHAR(20) NULL,
+  request_hash CHAR(64) NULL,
+  response_snapshot JSON NULL,
+  started_at DATETIME(6) NULL,
+  completed_at DATETIME(6) NULL,
+  expires_at DATETIME(6) NOT NULL,
+  UNIQUE KEY uk_idempotency_key (client_id, scope, idempotency_key),
+  KEY idx_idempotency_key_status_started_at (status, started_at),
+  KEY idx_idempotency_key_expires_at (expires_at)
+);
+```
+
+### 10-2. outbox_events
+
+```sql
+CREATE TABLE integration.outbox_events (
+  event_id CHAR(36) PRIMARY KEY,
+  aggregate_type VARCHAR(50) NOT NULL,
+  aggregate_id VARCHAR(50) NOT NULL,
+  event_type VARCHAR(100) NOT NULL,
+  payload JSON NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  created_at DATETIME(6) NOT NULL,
+  KEY idx_outbox_events_status_created_at (status, created_at)
+);
+```
+
+### 10-3. processed_events
+
+```sql
+CREATE TABLE integration.processed_events (
+  event_id CHAR(36) PRIMARY KEY,
+  processed_at DATETIME(6) NOT NULL
+);
+```
