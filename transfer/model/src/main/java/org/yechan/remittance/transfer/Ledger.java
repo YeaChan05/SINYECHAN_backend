@@ -1,6 +1,6 @@
 package org.yechan.remittance.transfer;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record Ledger(
     Long ledgerId,
@@ -8,7 +8,7 @@ public record Ledger(
     Long accountId,
     Long amount,
     LedgerSideValue side,
-    Instant createdAt
+    LocalDateTime createdAt
 ) implements LedgerModel {
 
 }
