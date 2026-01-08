@@ -1,7 +1,5 @@
 package org.yechan.remittance.transfer;
 
-import java.time.Instant;
-
 public interface OutboxEventProps {
 
   String aggregateType();
@@ -13,8 +11,6 @@ public interface OutboxEventProps {
   String payload();
 
   OutboxEventStatusValue status();
-
-  Instant createdAt();
 
   enum OutboxEventStatusValue {
     NEW,

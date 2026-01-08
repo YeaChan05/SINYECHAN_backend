@@ -3,7 +3,7 @@ package org.yechan.remittance.transfer;
 import java.time.Instant;
 
 public record OutboxEvent(
-    String eventId,
+    Long eventId,
     String aggregateType,
     String aggregateId,
     String eventType,

@@ -1,23 +1,18 @@
 package org.yechan.remittance.transfer.repository;
 
-import com.github.f4b6a3.tsid.TsidCreator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.Instant;
+import org.yechan.remittance.BaseEntity;
 import org.yechan.remittance.transfer.OutboxEventModel;
 import org.yechan.remittance.transfer.OutboxEventProps;
 
 @Entity
 @Table(name = "outbox_events", schema = "integration")
-public class OutboxEventEntity implements OutboxEventModel {
+public class OutboxEventEntity extends BaseEntity implements OutboxEventModel {
 
-  @Id
-  @Column(nullable = false)
-  private String eventId;
 
   @Column(nullable = false)
   private String aggregateType;
@@ -35,45 +30,37 @@ public class OutboxEventEntity implements OutboxEventModel {
   @Column(nullable = false)
   private OutboxEventStatusValue status;
 
-  @Column(nullable = false)
-  private Instant createdAt;
 
   protected OutboxEventEntity() {
   }
 
   private OutboxEventEntity(
-      String eventId,
       String aggregateType,
       String aggregateId,
       String eventType,
       String payload,
-      OutboxEventStatusValue status,
-      Instant createdAt
+      OutboxEventStatusValue status
   ) {
-    this.eventId = eventId;
     this.aggregateType = aggregateType;
     this.aggregateId = aggregateId;
     this.eventType = eventType;
     this.payload = payload;
     this.status = status;
-    this.createdAt = createdAt;
   }
 
   static OutboxEventEntity create(OutboxEventProps props) {
     return new OutboxEventEntity(
-        TsidCreator.getTsid().toString(),
         props.aggregateType(),
         props.aggregateId(),
         props.eventType(),
         props.payload(),
-        props.status(),
-        props.createdAt()
+        props.status()
     );
   }
 
   @Override
-  public String eventId() {
-    return eventId;
+  public Long eventId() {
+    return super.getId();
   }
 
   @Override
@@ -101,8 +88,4 @@ public class OutboxEventEntity implements OutboxEventModel {
     return status;
   }
 
-  @Override
-  public Instant createdAt() {
-    return createdAt;
-  }
 }

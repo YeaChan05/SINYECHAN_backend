@@ -1,6 +1,5 @@
 package org.yechan.remittance.transfer.repository;
 
-import com.github.f4b6a3.tsid.TsidCreator;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

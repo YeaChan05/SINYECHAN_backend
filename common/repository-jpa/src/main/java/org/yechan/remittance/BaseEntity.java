@@ -1,8 +1,7 @@
 package org.yechan.remittance;
 
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
@@ -16,13 +15,15 @@ import org.jspecify.annotations.Nullable;
 @MappedSuperclass
 public abstract class BaseEntity {
 
+  @Id
+  @Tsid
+  private Long id;
+
   @Column(updatable = false)
   LocalDateTime createdAt;
+
   @Column
   LocalDateTime updatedAt;
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
 
   protected BaseEntity() {
   }
@@ -42,6 +43,14 @@ public abstract class BaseEntity {
   @Nullable
   public Long getId() {
     return id;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
   }
 
   @Override
