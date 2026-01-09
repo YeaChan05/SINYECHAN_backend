@@ -84,7 +84,7 @@ class AccountDeleteServiceIntegrationTest {
     }
 
     @Override
-    public AccountModel updateBalance(AccountIdentifier identifier, Long balance) {
+    public AccountModel updateBalance(AccountIdentifier identifier, java.math.BigDecimal balance) {
       return null;
     }
 

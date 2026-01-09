@@ -1,6 +1,7 @@
 package org.yechan.remittance.account.repository;
 
 import jakarta.persistence.LockModeType;
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -29,5 +30,5 @@ interface AccountJpaRepository extends JpaRepository<AccountEntity, Long> {
       set a.balance = :balance
       where a.id = :accountId
       """)
-  int updateBalance(@Param("accountId") Long accountId, @Param("balance") Long balance);
+  int updateBalance(@Param("accountId") Long accountId, @Param("balance") BigDecimal balance);
 }

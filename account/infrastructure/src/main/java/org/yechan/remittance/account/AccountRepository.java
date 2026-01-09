@@ -16,7 +16,7 @@ public interface AccountRepository {
       String accountNumber
   );
 
-  AccountModel updateBalance(AccountIdentifier identifier, Long balance);
+  AccountModel updateBalance(AccountIdentifier identifier, java.math.BigDecimal balance);
 
   void delete(AccountIdentifier identifier);
 }

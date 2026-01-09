@@ -42,7 +42,7 @@ public class AccountRepositoryImpl implements AccountRepository {
   }
 
   @Override
-  public AccountModel updateBalance(AccountIdentifier identifier, Long balance) {
+  public AccountModel updateBalance(AccountIdentifier identifier, java.math.BigDecimal balance) {
     repository.updateBalance(identifier.accountId(), balance);
     return repository.findById(identifier.accountId()).orElseThrow();
   }
