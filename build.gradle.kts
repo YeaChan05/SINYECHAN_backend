@@ -73,6 +73,10 @@ configureByTypePrefix("java") {
         extendsFrom(configurations.testImplementation.get())
     }
 
+    val integrationTestRuntimeOnly by configurations.getting {
+        extendsFrom(configurations.testRuntimeOnly.get())
+    }
+
     val integrationTestCompileOnly by configurations.getting
     val integrationTestAnnotationProcessor by configurations.getting
 
@@ -88,6 +92,8 @@ configureByTypePrefix("java") {
         integrationTestImplementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.20.4"))
         integrationTestImplementation("org.testcontainers:junit-jupiter")
         integrationTestImplementation("org.testcontainers:testcontainers")
+        integrationTestRuntimeOnly("org.testcontainers:testcontainers")
+        integrationTestRuntimeOnly("org.testcontainers:jdbc")
 
         implementation(rootProject.libs.jspecify)
 //        compileOnly(rootProject.libs.lombok)

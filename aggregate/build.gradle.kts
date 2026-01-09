@@ -13,6 +13,7 @@ dependencies {
     integrationTestImplementation("org.testcontainers:junit-jupiter")
     integrationTestImplementation("org.testcontainers:mysql")
     integrationTestImplementation(testFixtures(project(":common:application-api")))
+    integrationTestImplementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
 
     runtimeOnly("com.mysql:mysql-connector-j") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
@@ -21,4 +22,7 @@ dependencies {
     integrationTestRuntimeOnly("com.mysql:mysql-connector-j") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
+
+    integrationTestRuntimeOnly("org.testcontainers:testcontainers")
+    integrationTestRuntimeOnly("org.testcontainers:jdbc")
 }

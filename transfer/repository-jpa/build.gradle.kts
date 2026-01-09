@@ -4,6 +4,8 @@ dependencies {
 
     integrationTestImplementation("org.testcontainers:junit-jupiter")
     integrationTestImplementation("org.testcontainers:mysql")
+    integrationTestImplementation("org.testcontainers:testcontainers")
+    integrationTestImplementation("org.testcontainers:jdbc")
     integrationTestImplementation(testFixtures(project(":common:application-api")))
     integrationTestImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
     integrationTestRuntimeOnly("com.mysql:mysql-connector-j") {
