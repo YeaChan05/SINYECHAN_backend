@@ -2,7 +2,7 @@ package org.yechan.application;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.yechan.remittance.member.application.AggregateApplication;
+import org.yechan.remittance.AggregateApplication;
 
 @SpringBootTest(classes = AggregateApplication.class)
 class AggregateApplicationTest {

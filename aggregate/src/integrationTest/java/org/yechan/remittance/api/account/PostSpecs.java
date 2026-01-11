@@ -13,7 +13,7 @@ import org.yechan.remittance.PasswordGenerator;
 import org.yechan.remittance.TokenVerifier;
 import org.yechan.remittance.account.dto.AccountCreateRequest;
 import org.yechan.remittance.account.dto.AccountCreateResponse;
-import org.yechan.remittance.member.application.AggregateApplication;
+import org.yechan.remittance.AggregateApplication;
 import org.yechan.remittance.member.dto.MemberLoginRequest;
 import org.yechan.remittance.member.dto.MemberLoginResponse;
 import org.yechan.remittance.member.dto.MemberRegisterRequest;

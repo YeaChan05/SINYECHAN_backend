@@ -25,7 +25,7 @@ import org.yechan.remittance.TransferTestFixtures;
 import org.yechan.remittance.TransferTestFixtures.LedgerRow;
 import org.yechan.remittance.TransferTestFixturesConfig;
 import org.yechan.remittance.account.AccountIdentifier;
-import org.yechan.remittance.member.application.AggregateApplication;
+import org.yechan.remittance.AggregateApplication;
 import org.yechan.remittance.transfer.TransferIdentifier;
 import org.yechan.remittance.transfer.TransferModel;
 import org.yechan.remittance.transfer.TransferQueryCondition;

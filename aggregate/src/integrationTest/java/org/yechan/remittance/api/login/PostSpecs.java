@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.yechan.remittance.EmailGenerator;
 import org.yechan.remittance.PasswordGenerator;
-import org.yechan.remittance.member.application.AggregateApplication;
+import org.yechan.remittance.AggregateApplication;
 import org.yechan.remittance.member.dto.MemberLoginRequest;
 import org.yechan.remittance.member.dto.MemberLoginResponse;
 import org.yechan.remittance.member.dto.MemberRegisterRequest;
