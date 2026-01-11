@@ -2,7 +2,7 @@
 
 ## 애플리케이션 의존성
 
-- Springdoc OpenAPI UI: `org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0` - API 문서/Swagger UI 제공
+- Springdoc OpenAPI UI: `org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1` - API 문서/Swagger UI 제공
 - Micrometer Tracing(Otel Bridge): `io.micrometer:micrometer-tracing-bridge-otel` - 분산 추적
 - JSpecify: `org.jspecify:jspecify` - null 표기 등 타입 주석 지원
 - MySQL Connector/J: `com.mysql:mysql-connector-j` - MySQL DB 연결 드라이버
