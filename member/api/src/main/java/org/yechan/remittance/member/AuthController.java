@@ -11,10 +11,13 @@ import org.yechan.remittance.member.dto.MemberLoginResponse;
 @RestController
 record AuthController(
     MemberQueryUseCase memberQueryUseCase
-) {
+) implements AuthApi {
 
+  @Override
   @PostMapping("/login")
-  ResponseEntity<MemberLoginResponse> login(@RequestBody @Valid MemberLoginRequest request) {
+  public ResponseEntity<MemberLoginResponse> login(
+      @RequestBody @Valid MemberLoginRequest request
+  ) {
     var token = memberQueryUseCase.login(request);
     var response = new MemberLoginResponse(token.accessToken(), token.refreshToken(),
         token.expiresIn());

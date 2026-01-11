@@ -11,10 +11,11 @@ import org.yechan.remittance.transfer.dto.IdempotencyKeyCreateResponse;
 @RequestMapping("/idempotency-keys")
 record IdempotencyKeyController(
     IdempotencyKeyCreateUseCase idempotencyKeyCreateUseCase
-) {
+) implements IdempotencyKeyApi {
 
+  @Override
   @PostMapping
-  ResponseEntity<IdempotencyKeyCreateResponse> create(@LoginUserId Long memberId) {
+  public ResponseEntity<IdempotencyKeyCreateResponse> create(@LoginUserId Long memberId) {
     var created = idempotencyKeyCreateUseCase.create(new IdempotencyKeyCreateCommand(memberId));
     return ResponseEntity.ok(
         new IdempotencyKeyCreateResponse(created.idempotencyKey(), created.expiresAt()));

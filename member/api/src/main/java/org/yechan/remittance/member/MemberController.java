@@ -14,10 +14,11 @@ import org.yechan.remittance.member.dto.MemberRegisterResponse;
 @RequestMapping("/members")
 record MemberController(
     MemberCreateUseCase memberCreateUseCase
-) {
+) implements MemberApi {
 
+  @Override
   @PostMapping
-  ResponseEntity<MemberRegisterResponse> register(
+  public ResponseEntity<MemberRegisterResponse> register(
       @RequestBody @Valid MemberRegisterRequest request) {
     var model = memberCreateUseCase.register(request);
     var response = new MemberRegisterResponse(model.name());

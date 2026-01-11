@@ -12,10 +12,11 @@ import org.yechan.remittance.transfer.dto.TransferRequest;
 @RestController
 record TransferController(
     TransferCreateUseCase transferCreateUseCase
-) {
+) implements TransferApi {
 
+  @Override
   @PostMapping("/{idempotencyKey}")
-  TransferResult transfer(
+  public TransferResult transfer(
       @LoginUserId Long memberId,
       @PathVariable String idempotencyKey,
       @RequestBody TransferRequest props) {

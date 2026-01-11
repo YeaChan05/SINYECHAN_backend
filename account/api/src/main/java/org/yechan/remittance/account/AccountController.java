@@ -19,10 +19,11 @@ import org.yechan.remittance.account.dto.AccountDeleteResponse;
 record AccountController(
     AccountCreateUseCase accountCreateUseCase,
     AccountDeleteUseCase accountDeleteUseCase
-) {
+) implements AccountApi {
 
+  @Override
   @PostMapping
-  ResponseEntity<AccountCreateResponse> create(
+  public ResponseEntity<AccountCreateResponse> create(
       @LoginUserId Long memberId,
       @RequestBody @Valid AccountCreateRequest request
   ) {
@@ -32,8 +33,9 @@ record AccountController(
     return ResponseEntity.ok(new AccountCreateResponse(account.accountId(), account.accountName()));
   }
 
+  @Override
   @DeleteMapping("/{accountId}")
-  ResponseEntity<AccountDeleteResponse> delete(
+  public ResponseEntity<AccountDeleteResponse> delete(
       @LoginUserId Long memberId,
       @PathVariable Long accountId
   ) {
