@@ -10,11 +10,6 @@ import org.springframework.context.annotation.Bean;
 class IdempotencyKeyAutoConfiguration {
 
   @Bean
-  Clock clock() {
-    return Clock.systemUTC();
-  }
-
-  @Bean
   IdempotencyKeyCreateUseCase idempotencyKeyCreateUseCase(
       IdempotencyKeyRepository repository,
       Clock idempotencyKeyClock,
