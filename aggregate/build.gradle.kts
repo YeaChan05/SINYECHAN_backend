@@ -17,7 +17,7 @@ dependencies {
     integrationTestImplementation(project(":account:model"))
     integrationTestImplementation(project(":member:model"))
     integrationTestImplementation(project(":transfer:model"))
-
+    integrationTestImplementation(project(":transfer:infrastructure"))
 
     runtimeOnly("com.mysql:mysql-connector-j") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")

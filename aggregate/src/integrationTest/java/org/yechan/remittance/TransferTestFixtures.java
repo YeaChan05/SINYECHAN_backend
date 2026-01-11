@@ -1,7 +1,6 @@
 package org.yechan.remittance;
 
 import jakarta.persistence.EntityManager;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,7 +13,6 @@ import org.yechan.remittance.account.AccountProps;
 import org.yechan.remittance.member.dto.MemberLoginRequest;
 import org.yechan.remittance.member.dto.MemberLoginResponse;
 import org.yechan.remittance.member.dto.MemberRegisterRequest;
-import org.yechan.remittance.member.repository.MemberEntity;
 
 public class TransferTestFixtures {
 
@@ -104,15 +102,15 @@ public class TransferTestFixtures {
     }
   }
 
-  public MemberEntity createMember(String name, String email, String passwordHash) {
-    try {
-      return MemberEntity.class.getDeclaredConstructor(String.class, String.class, String.class)
-          .newInstance(name, email, passwordHash);
-    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-             NoSuchMethodException e) {
-      throw new RuntimeException(e);
-    }
-  }
+//  public MemberEntity createMember(String name, String email, String passwordHash) {
+//    try {
+//      return MemberEntity.class.getDeclaredConstructor(String.class, String.class, String.class)
+//          .newInstance(name, email, passwordHash);
+//    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+//             NoSuchMethodException e) {
+//      throw new RuntimeException(e);
+//    }
+//  }
 
   public AuthSeed registerAndIssueToken(String name) {
     String email = EmailGenerator.generate();
@@ -182,6 +180,36 @@ public class TransferTestFixtures {
         .toList();
   }
 
+  public List<Long> loadOutboxEventIds(Long transferId) {
+    return em.createQuery(
+            """
+                select o.id
+                  from OutboxEventEntity o
+                 where o.aggregateType = :aggregateType
+                   and o.aggregateId = :aggregateId
+                """,
+            Long.class
+        )
+        .setParameter("aggregateType", "TRANSFER")
+        .setParameter("aggregateId", transferId.toString())
+        .getResultList();
+  }
+
+  public void markOutboxSent(Long eventId) {
+    transactionTemplate.executeWithoutResult(status -> {
+      em.createQuery(
+              """
+                  update OutboxEventEntity o
+                     set o.status = org.yechan.remittance.transfer.OutboxEventProps$OutboxEventStatusValue.SENT
+                   where o.id = :eventId
+                  """
+          )
+          .setParameter("eventId", eventId)
+          .executeUpdate();
+      em.flush();
+    });
+  }
+
   public long countOutboxEvents() {
     Long count = em.createQuery(
             "select count(o) from OutboxEventEntity o",
@@ -241,6 +269,55 @@ public class TransferTestFixtures {
         )
         .getSingleResult();
     return count == null ? 0L : count;
+  }
+
+  public void markIdempotencyInProgress(
+      Long memberId,
+      String idempotencyKey,
+      LocalDateTime startedAt
+  ) {
+    transactionTemplate.executeWithoutResult(status -> {
+      em.createQuery(
+              """
+                  update IdempotencyKeyEntity i
+                     set i.status = org.yechan.remittance.transfer.IdempotencyKeyProps$IdempotencyKeyStatusValue.IN_PROGRESS,
+                         i.startedAt = :startedAt
+                   where i.memberId = :memberId
+                     and i.scope = org.yechan.remittance.transfer.IdempotencyKeyProps$IdempotencyScopeValue.TRANSFER
+                     and i.idempotencyKey = :idempotencyKey
+                  """
+          )
+          .setParameter("memberId", memberId)
+          .setParameter("idempotencyKey", idempotencyKey)
+          .setParameter("startedAt", startedAt)
+          .executeUpdate();
+      em.flush();
+    });
+  }
+
+  public int markIdempotencyTimeoutBefore(
+      LocalDateTime cutoff,
+      String responseSnapshot,
+      LocalDateTime completedAt
+  ) {
+    return transactionTemplate.execute(status -> {
+      int updated = em.createQuery(
+              """
+                  update IdempotencyKeyEntity i
+                     set i.status = org.yechan.remittance.transfer.IdempotencyKeyProps$IdempotencyKeyStatusValue.TIMEOUT,
+                         i.responseSnapshot = :responseSnapshot,
+                         i.completedAt = :completedAt
+                   where i.status = org.yechan.remittance.transfer.IdempotencyKeyProps$IdempotencyKeyStatusValue.IN_PROGRESS
+                     and i.startedAt < :cutoff
+                  """
+          )
+          .setParameter("cutoff", cutoff)
+          .setParameter("responseSnapshot", responseSnapshot)
+          .setParameter("completedAt", completedAt)
+          .executeUpdate();
+      em.flush();
+      return updated;
+    });
   }
 
   public Result setupAuthentication() {
