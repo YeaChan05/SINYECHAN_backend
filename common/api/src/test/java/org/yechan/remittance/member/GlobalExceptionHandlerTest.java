@@ -18,7 +18,7 @@ class GlobalExceptionHandlerTest {
     ResponseEntity<?> response = handler.handleBusinessException(exception);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-    assertThat(response.getBody()).isSameAs(exception);
+    assertThat(response.getBody()).isSameAs(exception.getMessage());
   }
 
   @Test
@@ -29,7 +29,7 @@ class GlobalExceptionHandlerTest {
     ResponseEntity<?> response = handler.handleBusinessException(exception);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-    assertThat(response.getBody()).isSameAs(exception);
+    assertThat(response.getBody()).isSameAs(exception.getMessage());
   }
 
   private static class SomeBusinessException extends BusinessException {
