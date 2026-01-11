@@ -49,7 +49,11 @@ class MemberService implements MemberCreateUseCase {
     @Override
     public String password() {
       // password hash
-      return passwordHashEncoder.encode(props.password());
+      try {
+        return passwordHashEncoder.encode(props.password());
+      } catch (IllegalArgumentException e) {
+        throw new MemberException("Invalid password: " + props.password() + ", " + e.getMessage());
+      }
     }
   }
 }
