@@ -10,10 +10,11 @@
 
 ## request
 
-- body: x
+- query
+  - `scope` (선택): `TRANSFER | DEPOSIT | WITHDRAW`
 
 ```http request
-POST /idempotency-keys
+POST /idempotency-keys?scope=TRANSFER
 Content-Type: application/json
 Authorization: `Bearer {access_token}`
 
