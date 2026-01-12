@@ -77,7 +77,7 @@ class GetSpecs extends TestContainerSetup {
     assertThat(response.transfers()).hasSize(2);
     assertThat(response.transfers().getFirst().transferId()).isEqualTo(secondResponse.transferId());
     assertThat(response.transfers().get(1).transferId()).isEqualTo(firstResponse.transferId());
-    assertThat(response.transfers()).isSortedAccordingTo(Comparator.comparing(TransferItem::completedAt));
+    assertThat(response.transfers()).isSortedAccordingTo(Comparator.comparing(TransferItem::completedAt).reversed());
   }
 
   @Test
