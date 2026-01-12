@@ -1,7 +1,6 @@
 package org.yechan.remittance.transfer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -36,7 +35,8 @@ class TransferEventPublisherImplTest {
 
     publisher.publish(event);
 
-    ArgumentCaptor<MessagePostProcessor> captor = ArgumentCaptor.forClass(MessagePostProcessor.class);
+    ArgumentCaptor<MessagePostProcessor> captor = ArgumentCaptor.forClass(
+        MessagePostProcessor.class);
     verify(rabbitTemplate)
         .convertAndSend(eq("transfer.exchange"), eq("transfer.completed"), eq("payload"),
             captor.capture());

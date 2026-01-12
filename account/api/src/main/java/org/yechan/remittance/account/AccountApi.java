@@ -16,7 +16,7 @@ interface AccountApi {
 
   @Operation(summary = "계좌 등록", description = "회원의 계좌를 등록합니다.")
   @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "등록 성공", content = @Content)
+      @ApiResponse(responseCode = "200", description = "등록 성공", content = @Content)
   })
   ResponseEntity<AccountCreateResponse> create(
       @Parameter(hidden = true) Long memberId,
@@ -25,7 +25,7 @@ interface AccountApi {
 
   @Operation(summary = "계좌 삭제", description = "회원의 계좌를 삭제합니다.")
   @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "삭제 성공", content = @Content)
+      @ApiResponse(responseCode = "200", description = "삭제 성공", content = @Content)
   })
   ResponseEntity<AccountDeleteResponse> delete(
       @Parameter(hidden = true) Long memberId,

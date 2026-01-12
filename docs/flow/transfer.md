@@ -1,4 +1,4 @@
-# 계좌 이체 흐름 
+# 계좌 이체 흐름
 
 계좌 이체는 멱등 처리 + outbox 패턴을 사용해
 정확히 한 번의 송금과 최소 한 번의 이벤트 발행을 보장한다.
@@ -70,9 +70,9 @@
 
 ```sql
 UPDATE idempotency_key
-SET status = 'IN_PROGRESS',
+SET status       = 'IN_PROGRESS',
     request_hash = ?,
-    started_at = now()
+    started_at   = now()
 WHERE client_id = ?
   AND scope = ?
   AND idempotency_key = ?
@@ -185,9 +185,9 @@ WHERE client_id = ?
 
 ```sql
 UPDATE idempotency_key
-SET status = 'FAILED',
+SET status       = 'FAILED',
     completed_at = now(),
-    error_code = 'TIMEOUT'
+    error_code   = 'TIMEOUT'
 WHERE status = 'IN_PROGRESS'
   AND started_at < now() - timeout;
 ```
@@ -204,8 +204,9 @@ SELECT *
 FROM outbox_events
 WHERE status = 'NEW'
 ORDER BY created_at
-FOR UPDATE SKIP LOCKED
-LIMIT N;
+    FOR
+UPDATE SKIP LOCKED
+    LIMIT N;
 ```
 
 - publish 성공 → `SENT`
@@ -251,34 +252,36 @@ LIMIT N;
 ### 10-1. idempotency_key
 
 ```sql
-CREATE TABLE integration.idempotency_key (
-  idempotency_key_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  client_id BIGINT NOT NULL,
-  scope VARCHAR(50) NOT NULL,
-  idempotency_key CHAR(36) NOT NULL,
-  status VARCHAR(20) NULL,
-  request_hash CHAR(64) NULL,
-  response_snapshot JSON NULL,
-  started_at DATETIME(6) NULL,
-  completed_at DATETIME(6) NULL,
-  expires_at DATETIME(6) NOT NULL,
-  UNIQUE KEY uk_idempotency_key (client_id, scope, idempotency_key),
-  KEY idx_idempotency_key_status_started_at (status, started_at),
-  KEY idx_idempotency_key_expires_at (expires_at)
+CREATE TABLE integration.idempotency_key
+(
+    idempotency_key_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    client_id          BIGINT      NOT NULL,
+    scope              VARCHAR(50) NOT NULL,
+    idempotency_key    CHAR(36)    NOT NULL,
+    status             VARCHAR(20) NULL,
+    request_hash       CHAR(64)    NULL,
+    response_snapshot  JSON        NULL,
+    started_at         DATETIME(6) NULL,
+    completed_at       DATETIME(6) NULL,
+    expires_at         DATETIME(6) NOT NULL,
+    UNIQUE KEY uk_idempotency_key (client_id, scope, idempotency_key),
+    KEY idx_idempotency_key_status_started_at (status, started_at),
+    KEY idx_idempotency_key_expires_at (expires_at)
 );
 ```
 
 ### 10-2. outbox_events
 
 ```sql
-CREATE TABLE integration.outbox_events (
-  event_id CHAR(36) PRIMARY KEY,
-  aggregate_type VARCHAR(50) NOT NULL,
-  aggregate_id VARCHAR(50) NOT NULL,
-  event_type VARCHAR(100) NOT NULL,
-  payload JSON NOT NULL,
-  status VARCHAR(20) NOT NULL,
-  created_at DATETIME(6) NOT NULL,
-  KEY idx_outbox_events_status_created_at (status, created_at)
+CREATE TABLE integration.outbox_events
+(
+    event_id       CHAR(36) PRIMARY KEY,
+    aggregate_type VARCHAR(50)  NOT NULL,
+    aggregate_id   VARCHAR(50)  NOT NULL,
+    event_type     VARCHAR(100) NOT NULL,
+    payload        JSON         NOT NULL,
+    status         VARCHAR(20)  NOT NULL,
+    created_at     DATETIME(6)  NOT NULL,
+    KEY idx_outbox_events_status_created_at (status, created_at)
 );
 ```

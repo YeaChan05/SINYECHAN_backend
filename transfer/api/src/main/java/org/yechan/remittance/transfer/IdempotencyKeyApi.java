@@ -14,7 +14,7 @@ interface IdempotencyKeyApi {
 
   @Operation(summary = "멱등키 생성", description = "송금 요청용 멱등키를 생성합니다.")
   @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "생성 성공", content = @Content)
+      @ApiResponse(responseCode = "200", description = "생성 성공", content = @Content)
   })
   ResponseEntity<IdempotencyKeyCreateResponse> create(
       @Parameter(hidden = true) Long memberId

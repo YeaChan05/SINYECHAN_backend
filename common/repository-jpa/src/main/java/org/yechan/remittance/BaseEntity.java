@@ -15,15 +15,13 @@ import org.jspecify.annotations.Nullable;
 @MappedSuperclass
 public abstract class BaseEntity {
 
+  @Column(updatable = false)
+  LocalDateTime createdAt;
+  @Column
+  LocalDateTime updatedAt;
   @Id
   @Tsid
   private Long id;
-
-  @Column(updatable = false)
-  LocalDateTime createdAt;
-
-  @Column
-  LocalDateTime updatedAt;
 
   protected BaseEntity() {
   }

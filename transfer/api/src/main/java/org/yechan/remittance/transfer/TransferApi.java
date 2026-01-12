@@ -13,7 +13,7 @@ interface TransferApi {
 
   @Operation(summary = "송금 요청", description = "멱등키로 송금을 요청합니다.")
   @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "송금 성공", content = @Content)
+      @ApiResponse(responseCode = "200", description = "송금 성공", content = @Content)
   })
   TransferResult transfer(
       @Parameter(hidden = true) Long memberId,

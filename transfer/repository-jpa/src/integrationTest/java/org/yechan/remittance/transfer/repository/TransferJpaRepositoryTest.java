@@ -61,7 +61,8 @@ class TransferJpaRepositoryTest {
     );
 
     assertThat(results).hasSize(2);
-    assertThat(results).isSortedAccordingTo(Comparator.comparing(TransferEntity::completedAt).reversed());
+    assertThat(results).isSortedAccordingTo(
+        Comparator.comparing(TransferEntity::completedAt).reversed());
     assertThat(results.get(0).status()).isEqualTo(TransferStatusValue.FAILED);
     assertThat(results.get(1).status()).isEqualTo(TransferStatusValue.SUCCEEDED);
     assertThat(results.get(0).completedAt()).isAfter(results.get(1).completedAt());

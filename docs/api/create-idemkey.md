@@ -1,13 +1,15 @@
 # API
 
 ## 개요
+
 - goal: 송금/결제 요청에 사용할 멱등키(Idempotency-Key)를 사전에 발급한다.  
-        클라이언트는 이후 실제 송금/결제 API 호출 시 이 키를 사용한다.
+  클라이언트는 이후 실제 송금/결제 API 호출 시 이 키를 사용한다.
 - endpoint: `/idempotency-keys`
 - Content-Type: `application/json`
 - Authorization: `Bearer {access_token}`
 
 ## request
+
 - body: x
 
 ```http request

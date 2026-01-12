@@ -48,7 +48,8 @@ class IdempotencyKeyService implements IdempotencyKeyCreateUseCase {
     private final String key;
     private final LocalDateTime now;
 
-    public GeneratedIdempotencyKeyProps(IdempotencyKeyCreateProps props, String key, LocalDateTime now) {
+    public GeneratedIdempotencyKeyProps(IdempotencyKeyCreateProps props, String key,
+        LocalDateTime now) {
       this.props = props;
       this.key = key;
       this.now = now;

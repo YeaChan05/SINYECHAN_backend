@@ -8,9 +8,9 @@
 * 기술(JPA, Web, MQ 등)은 Driven 모듈에만 둔다.
 * 다른 애플리케이션과의 연결은 `api-internal` 계약으로만 한다.
 * 인증/인가 책임은 역할별로 분리한다.
-  * 로그인/토큰 발급: `auth:service`
-  * 자격 검증: `member:service` + `member:api-internal`
-  * 토큰 검증/필터: `common:security`
+    * 로그인/토큰 발급: `auth:service`
+    * 자격 검증: `member:service` + `member:api-internal`
+    * 토큰 검증/필터: `common:security`
 
 ---
 
@@ -229,14 +229,14 @@
 
 * 직접 참조 최소
 
-  * 가능하면 다른 도메인의 `model/service/repository`를 의존 x
+    * 가능하면 다른 도메인의 `model/service/repository`를 의존 x
 * 허용
 
-  * `api-internal-client` ↔ 상대 앱 `api-internal`
-  * 내부 연동 시 `api-internal` 계약 우선
+    * `api-internal-client` ↔ 상대 앱 `api-internal`
+    * 내부 연동 시 `api-internal` 계약 우선
 * 연결 방식
 
-  * 런타임(HTTP/MQ) 연결은 간접(Indirect) 관계로만 표현
+    * 런타임(HTTP/MQ) 연결은 간접(Indirect) 관계로만 표현
 
 ---
 
@@ -244,12 +244,12 @@
 
 * `api` 사용 대상
 
-  * 계약(인터페이스, 타입)을 외부 모듈이 컴파일 타임에 알아야 할 때
-  * 예: `infrastructure -> model`을 `api(...)`로 노출
+    * 계약(인터페이스, 타입)을 외부 모듈이 컴파일 타임에 알아야 할 때
+    * 예: `infrastructure -> model`을 `api(...)`로 노출
 * `implementation` 사용 대상
 
-  * 내부 구현 세부사항(교체 가능해야 하는 것)
-  * 예: `service -> infrastructure`, `api -> service`, `repository-* -> infrastructure`
+    * 내부 구현 세부사항(교체 가능해야 하는 것)
+    * 예: `service -> infrastructure`, `api -> service`, `repository-* -> infrastructure`
 
 ---
 
@@ -258,20 +258,20 @@
 ### 9.1 auth
 
 * `auth:service`
-  - 의존: `auth:exception`, `auth:infrastructure`, `common:security`
+    - 의존: `auth:exception`, `auth:infrastructure`, `common:security`
 * `auth:infrastructure`
-  - 의존: `member:api-internal`
+    - 의존: `member:api-internal`
 
 ### 9.2 member (내부 인증 제공)
 
 * `member:service`
-  - 의존: `member:model`, `member:infrastructure`, `member:exception`
+    - 의존: `member:model`, `member:infrastructure`, `member:exception`
 * `member:api-internal`
-  - 의존: `member:service`
+    - 의존: `member:service`
 
 ### 9.3 common/aggregate
 
 * `common:security`
-  - 의존: `common:exception`
+    - 의존: `common:exception`
 * `aggregate`
-  - 의존: `common:security`, `auth:service`, `member:api`, `member:repository-jpa`
+    - 의존: `common:security`, `auth:service`, `member:api`, `member:repository-jpa`

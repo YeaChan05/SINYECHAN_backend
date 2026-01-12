@@ -1,4 +1,3 @@
-
 # 계좌 이체 알림 흐름
 
 계좌 이체 알림은 outbox + RabbitMQ + SSE를 사용해
@@ -87,7 +86,7 @@
 }
 ```
 
-4.  `NotificationPushPort` 호출
+4. `NotificationPushPort` 호출
 
 ---
 
@@ -143,6 +142,7 @@
 - `transferId`
 - `event_id`
 - `memberId`
+
 ### 메트릭
 
 - 알림 전송 성공/실패 수

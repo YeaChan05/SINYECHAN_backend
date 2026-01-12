@@ -25,48 +25,48 @@ class IdempotencyKeyControllerTest {
   private record TestIdempotencyKeyModel(LocalDateTime expiresAt) implements IdempotencyKeyModel {
 
     @Override
-      public Long idempotencyKeyId() {
-        return 1L;
-      }
-
-      @Override
-      public Long memberId() {
-        return 1L;
-      }
-
-      @Override
-      public String idempotencyKey() {
-        return "key";
-      }
-
-      @Override
-      public IdempotencyScopeValue scope() {
-        return IdempotencyScopeValue.TRANSFER;
-      }
-
-      @Override
-      public IdempotencyKeyStatusValue status() {
-        return IdempotencyKeyStatusValue.BEFORE_START;
-      }
-
-      @Override
-      public String requestHash() {
-        return null;
-      }
-
-      @Override
-      public String responseSnapshot() {
-        return null;
-      }
-
-      @Override
-      public LocalDateTime startedAt() {
-        return null;
-      }
-
-      @Override
-      public LocalDateTime completedAt() {
-        return null;
-      }
+    public Long idempotencyKeyId() {
+      return 1L;
     }
+
+    @Override
+    public Long memberId() {
+      return 1L;
+    }
+
+    @Override
+    public String idempotencyKey() {
+      return "key";
+    }
+
+    @Override
+    public IdempotencyScopeValue scope() {
+      return IdempotencyScopeValue.TRANSFER;
+    }
+
+    @Override
+    public IdempotencyKeyStatusValue status() {
+      return IdempotencyKeyStatusValue.BEFORE_START;
+    }
+
+    @Override
+    public String requestHash() {
+      return null;
+    }
+
+    @Override
+    public String responseSnapshot() {
+      return null;
+    }
+
+    @Override
+    public LocalDateTime startedAt() {
+      return null;
+    }
+
+    @Override
+    public LocalDateTime completedAt() {
+      return null;
+    }
+  }
 }

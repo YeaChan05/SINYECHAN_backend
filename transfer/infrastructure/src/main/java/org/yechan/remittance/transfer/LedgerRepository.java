@@ -6,5 +6,6 @@ public interface LedgerRepository {
 
   LedgerModel save(LedgerProps props);
 
-  boolean existsByTransferIdAndAccountIdAndSide(Long transferId, Long accountId, LedgerSideValue side);
+  boolean existsByTransferIdAndAccountIdAndSide(Long transferId, Long accountId,
+      LedgerSideValue side);
 }

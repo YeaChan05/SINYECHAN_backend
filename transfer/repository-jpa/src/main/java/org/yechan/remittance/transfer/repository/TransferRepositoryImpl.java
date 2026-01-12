@@ -61,38 +61,38 @@ public class TransferRepositoryImpl implements TransferRepository {
   private record TransferCreateCommand(TransferRequestProps props) implements TransferProps {
 
     @Override
-      public Long fromAccountId() {
-        return props.fromAccountId();
-      }
-
-      @Override
-      public Long toAccountId() {
-        return props.toAccountId();
-      }
-
-      @Override
-      public BigDecimal amount() {
-        return props.amount();
-      }
-
-      @Override
-      public TransferScopeValue scope() {
-        return TransferScopeValue.DEPOSIT;
-      }
-
-      @Override
-      public TransferStatusValue status() {
-        return TransferStatusValue.IN_PROGRESS;
-      }
-
-      @Override
-      public LocalDateTime requestedAt() {
-        return LocalDateTime.now();
-      }
-
-      @Override
-      public LocalDateTime completedAt() {
-        return null;
-      }
+    public Long fromAccountId() {
+      return props.fromAccountId();
     }
+
+    @Override
+    public Long toAccountId() {
+      return props.toAccountId();
+    }
+
+    @Override
+    public BigDecimal amount() {
+      return props.amount();
+    }
+
+    @Override
+    public TransferScopeValue scope() {
+      return TransferScopeValue.DEPOSIT;
+    }
+
+    @Override
+    public TransferStatusValue status() {
+      return TransferStatusValue.IN_PROGRESS;
+    }
+
+    @Override
+    public LocalDateTime requestedAt() {
+      return LocalDateTime.now();
+    }
+
+    @Override
+    public LocalDateTime completedAt() {
+      return null;
+    }
+  }
 }

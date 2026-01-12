@@ -42,75 +42,75 @@ class IdempotencyKeyServiceTest {
       IdempotencyKeyRepository {
 
     @Override
-      public IdempotencyKeyModel save(IdempotencyKeyProps props) {
-        saved.set(props);
-        return new IdempotencyKey(
-            saved.get().memberId(),
-            props.memberId(),
-            props.idempotencyKey(),
-            props.expiresAt(),
-            props.scope(),
-            props.status(),
-            props.requestHash(),
-            props.responseSnapshot(),
-            props.startedAt(),
-            props.completedAt()
-        );
-      }
-
-      @Override
-      public Optional<IdempotencyKeyModel> findByMemberIdAndIdempotencyKey(
-          Long memberId,
-          String idempotencyKey
-      ) {
-        return Optional.empty();
-      }
-
-      @Override
-      public Optional<IdempotencyKeyModel> findByKey(
-          Long memberId,
-          IdempotencyScopeValue scope,
-          String idempotencyKey
-      ) {
-        return Optional.empty();
-      }
-
-      @Override
-      public boolean tryMarkInProgress(
-          Long memberId,
-          IdempotencyScopeValue scope,
-          String idempotencyKey,
-          String requestHash,
-          LocalDateTime startedAt
-      ) {
-        return false;
-      }
-
-      @Override
-      public IdempotencyKeyModel markSucceeded(
-          Long memberId,
-          IdempotencyScopeValue scope,
-          String idempotencyKey,
-          String responseSnapshot,
-          LocalDateTime completedAt
-      ) {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public IdempotencyKeyModel markFailed(
-          Long memberId,
-          IdempotencyScopeValue scope,
-          String idempotencyKey,
-          String responseSnapshot,
-          LocalDateTime completedAt
-      ) {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public int markTimeoutBefore(LocalDateTime cutoff, String responseSnapshot) {
-        return 0;
-      }
+    public IdempotencyKeyModel save(IdempotencyKeyProps props) {
+      saved.set(props);
+      return new IdempotencyKey(
+          saved.get().memberId(),
+          props.memberId(),
+          props.idempotencyKey(),
+          props.expiresAt(),
+          props.scope(),
+          props.status(),
+          props.requestHash(),
+          props.responseSnapshot(),
+          props.startedAt(),
+          props.completedAt()
+      );
     }
+
+    @Override
+    public Optional<IdempotencyKeyModel> findByMemberIdAndIdempotencyKey(
+        Long memberId,
+        String idempotencyKey
+    ) {
+      return Optional.empty();
+    }
+
+    @Override
+    public Optional<IdempotencyKeyModel> findByKey(
+        Long memberId,
+        IdempotencyScopeValue scope,
+        String idempotencyKey
+    ) {
+      return Optional.empty();
+    }
+
+    @Override
+    public boolean tryMarkInProgress(
+        Long memberId,
+        IdempotencyScopeValue scope,
+        String idempotencyKey,
+        String requestHash,
+        LocalDateTime startedAt
+    ) {
+      return false;
+    }
+
+    @Override
+    public IdempotencyKeyModel markSucceeded(
+        Long memberId,
+        IdempotencyScopeValue scope,
+        String idempotencyKey,
+        String responseSnapshot,
+        LocalDateTime completedAt
+    ) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public IdempotencyKeyModel markFailed(
+        Long memberId,
+        IdempotencyScopeValue scope,
+        String idempotencyKey,
+        String responseSnapshot,
+        LocalDateTime completedAt
+    ) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int markTimeoutBefore(LocalDateTime cutoff, String responseSnapshot) {
+      return 0;
+    }
+  }
 }

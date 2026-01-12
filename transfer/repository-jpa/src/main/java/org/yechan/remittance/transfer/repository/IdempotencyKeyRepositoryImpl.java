@@ -1,7 +1,6 @@
 package org.yechan.remittance.transfer.repository;
 
 import java.time.LocalDateTime;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import org.yechan.remittance.transfer.IdempotencyKeyModel;
 import org.yechan.remittance.transfer.IdempotencyKeyProps;

@@ -5,5 +5,6 @@ import org.yechan.remittance.transfer.LedgerProps.LedgerSideValue;
 
 interface LedgerJpaRepository extends JpaRepository<LedgerEntity, Long> {
 
-  boolean existsByTransferIdAndAccountIdAndSide(Long transferId, Long accountId, LedgerSideValue side);
+  boolean existsByTransferIdAndAccountIdAndSide(Long transferId, Long accountId,
+      LedgerSideValue side);
 }

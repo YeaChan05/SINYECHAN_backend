@@ -2,14 +2,16 @@
 
 ## 애플리케이션 의존성
 
-- Springdoc OpenAPI UI: `org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1` - API 문서/Swagger UI 제공
+- Springdoc OpenAPI UI: `org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1` - API 문서/Swagger
+  UI 제공
 - Micrometer Tracing(Otel Bridge): `io.micrometer:micrometer-tracing-bridge-otel` - 분산 추적
 - JSpecify: `org.jspecify:jspecify` - null 표기 등 타입 주석 지원
 - MySQL Connector/J: `com.mysql:mysql-connector-j` - MySQL DB 연결 드라이버
 
 ## 테스트/개발 도구
 
-- Testcontainers: `org.testcontainers:testcontainers`, `org.testcontainers:junit-jupiter`, `org.testcontainers:mysql` - 통합 테스트용 컨테이너 기반 DB 환경
+- Testcontainers: `org.testcontainers:testcontainers`, `org.testcontainers:junit-jupiter`,
+  `org.testcontainers:mysql` - 통합 테스트용 컨테이너 기반 DB 환경
 
 ## 빌드 플러그인
 

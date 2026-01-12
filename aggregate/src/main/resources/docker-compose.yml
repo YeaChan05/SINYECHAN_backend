@@ -13,8 +13,8 @@ services:
       MYSQL_ROOT_PASSWORD: root
 
   rabbitmq:
-      container_name: rabbitmq-aggregate
-      image: rabbitmq:3.8.19
-      ports:
+    container_name: rabbitmq-aggregate
+    image: rabbitmq:3.8.19
+    ports:
       - "5672:5672"
       - "15672:15672"

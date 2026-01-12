@@ -28,7 +28,7 @@ public class TransferSnapshotUtil {
       throw new IllegalArgumentException("Snapshot is empty");
     }
     Map<String, String> values = parseSnapshot(snapshot);
-    
+
     TransferStatusValue status = TransferStatusValue.valueOf(values.get("status"));
     Long transferId = parseLong(values.get("transferId"));
     String errorCode = values.get("errorCode");

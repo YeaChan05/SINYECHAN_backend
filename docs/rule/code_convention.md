@@ -180,10 +180,9 @@
 - Entity ↔ Domain 변환은 Impl 책임
 - Domain이 Entity를 알면 안 됨
 
-
 ---
 
-## 5. application-{type} 
+## 5. application-{type}
 
 - 클래스
 

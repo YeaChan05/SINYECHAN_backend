@@ -10,12 +10,13 @@ import org.yechan.remittance.config.AggregateSecurityConfiguration;
 @SpringBootApplication
 @Import(AggregateSecurityConfiguration.class)
 public class AggregateApplication {
-  @Bean
-  Clock clock() {
-    return Clock.systemUTC();
-  }
 
   public static void main(String[] args) {
     SpringApplication.run(AggregateApplication.class, args);
+  }
+
+  @Bean
+  Clock clock() {
+    return Clock.systemUTC();
   }
 }

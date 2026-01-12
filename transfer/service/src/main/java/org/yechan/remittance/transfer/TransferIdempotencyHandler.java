@@ -1,6 +1,7 @@
 package org.yechan.remittance.transfer;
 
-import static org.yechan.remittance.transfer.TransferSnapshotUtil.*;
+import static org.yechan.remittance.transfer.TransferSnapshotUtil.fromSnapshot;
+import static org.yechan.remittance.transfer.TransferSnapshotUtil.toSnapshot;
 
 import java.time.LocalDateTime;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,7 +24,8 @@ public class TransferIdempotencyHandler {
       LocalDateTime now
   ) {
     var key = repository.findByKey(memberId, scope, idempotencyKey)
-        .orElseThrow(() -> new TransferIdempotencyKeyNotFoundException("Idempotency key not found"));
+        .orElseThrow(
+            () -> new TransferIdempotencyKeyNotFoundException("Idempotency key not found"));
     if (key.expiresAt() != null && key.expiresAt().isBefore(now)) {
       throw new TransferIdempotencyKeyExpiredException("Idempotency key expired");
     }
@@ -63,7 +65,8 @@ public class TransferIdempotencyHandler {
             memberId,
             scope,
             idempotencyKey)
-        .orElseThrow(() -> new TransferIdempotencyKeyNotFoundException("Idempotency key not found"));
+        .orElseThrow(
+            () -> new TransferIdempotencyKeyNotFoundException("Idempotency key not found"));
     validateRequestHash(existing, requestHash);
     if (existing.status() == IdempotencyKeyStatusValue.IN_PROGRESS) {
       return TransferResult.inProgress();
