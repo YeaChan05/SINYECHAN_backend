@@ -32,8 +32,8 @@ public interface IdempotencyKeyProps {
 
   enum IdempotencyScopeValue {
     TRANSFER, // 계좌 이체
-//    DEPOSIT,
-//    WITHDRAW,
+    DEPOSIT,
+    WITHDRAW,
 //    REFUND,
 //    PAYMENT,
 //    CANCEL_PAYMENT
