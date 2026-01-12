@@ -1,6 +1,7 @@
 package org.yechan.remittance.transfer;
 
 import static org.yechan.remittance.transfer.TransferFailureCode.ACCOUNT_NOT_FOUND;
+import static org.yechan.remittance.transfer.TransferFailureCode.DAILY_LIMIT_EXCEEDED;
 import static org.yechan.remittance.transfer.TransferFailureCode.INSUFFICIENT_BALANCE;
 import static org.yechan.remittance.transfer.TransferFailureCode.INVALID_REQUEST;
 import static org.yechan.remittance.transfer.TransferSnapshotUtil.toOutboxPayload;
@@ -12,9 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yechan.remittance.account.AccountModel;
 import org.yechan.remittance.account.AccountRepository;
 import org.yechan.remittance.transfer.IdempotencyKeyProps.IdempotencyScopeValue;
+import org.yechan.remittance.transfer.LedgerProps.LedgerSideValue;
 
 class TransferProcessService {
 
+  private static final BigDecimal DAILY_LIMIT = BigDecimal.valueOf(1_000_000);
   private static final String AGGREGATE_TYPE = "TRANSFER";
   private static final String EVENT_TYPE = "TRANSFER_COMPLETED";
 
@@ -22,17 +25,20 @@ class TransferProcessService {
   private final TransferRepository transferRepository;
   private final OutboxEventRepository outboxEventRepository;
   private final IdempotencyKeyRepository idempotencyKeyRepository;
+  private final LedgerRepository ledgerRepository;
 
   public TransferProcessService(
       AccountRepository accountRepository,
       TransferRepository transferRepository,
       OutboxEventRepository outboxEventRepository,
-      IdempotencyKeyRepository idempotencyKeyRepository
+      IdempotencyKeyRepository idempotencyKeyRepository,
+      LedgerRepository ledgerRepository
   ) {
     this.accountRepository = accountRepository;
     this.transferRepository = transferRepository;
     this.outboxEventRepository = outboxEventRepository;
     this.idempotencyKeyRepository = idempotencyKeyRepository;
+    this.ledgerRepository = ledgerRepository;
   }
 
   @Transactional
@@ -44,6 +50,7 @@ class TransferProcessService {
   ) {
     AccountPair accounts = lockAccounts(props);
     validateOwner(memberId, accounts);
+    validateDailyLimit(props, now);
     validateBalance(props, accounts);
     updateBalances(props, accounts);
     return persistTransfer(memberId, idempotencyKey, props, now);
@@ -81,6 +88,21 @@ class TransferProcessService {
   private void validateBalance(TransferRequestProps props, AccountPair accounts) {
     if (accounts.fromAccount().balance().compareTo(props.amount()) < 0) {
       throw new TransferFailedException(INSUFFICIENT_BALANCE, "Insufficient balance");
+    }
+  }
+
+  private void validateDailyLimit(TransferRequestProps props, LocalDateTime now) {
+    LocalDateTime startOfDay = now.toLocalDate().atStartOfDay();
+    LocalDateTime endOfDay = startOfDay.plusDays(1);
+    BigDecimal used = ledgerRepository.sumAmountByAccountIdAndSideBetween(
+        props.fromAccountId(),
+        LedgerSideValue.DEBIT,
+        startOfDay,
+        endOfDay
+    );
+
+    if (used.add(props.amount()).compareTo(DAILY_LIMIT) > 0) {
+      throw new TransferFailedException(DAILY_LIMIT_EXCEEDED, "Daily limit exceeded");
     }
   }
 

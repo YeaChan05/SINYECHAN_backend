@@ -1,5 +1,7 @@
 package org.yechan.remittance.transfer.repository;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import org.yechan.remittance.transfer.LedgerModel;
 import org.yechan.remittance.transfer.LedgerProps;
 import org.yechan.remittance.transfer.LedgerProps.LedgerSideValue;
@@ -22,6 +24,16 @@ public class LedgerRepositoryImpl implements LedgerRepository {
   public boolean existsByTransferIdAndAccountIdAndSide(Long transferId, Long accountId,
       LedgerSideValue side) {
     return repository.existsByTransferIdAndAccountIdAndSide(transferId, accountId, side);
+  }
+
+  @Override
+  public BigDecimal sumAmountByAccountIdAndSideBetween(
+      Long accountId,
+      LedgerSideValue side,
+      LocalDateTime from,
+      LocalDateTime to
+  ) {
+    return repository.sumAmountByAccountIdAndSideBetween(accountId, side, from, to);
   }
 
 }

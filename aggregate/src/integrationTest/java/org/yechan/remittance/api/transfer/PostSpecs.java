@@ -295,6 +295,61 @@ public class PostSpecs extends TestContainerSetup {
   }
 
   @Test
+  void shouldFailWhenDailyLimitExceeded() {
+    var result = fixtures.setupAuthentication();
+
+    var memberId = Long.parseLong(result.authentication().getName());
+    var fromAccountBalance = BigDecimal.valueOf(2_000_000L);
+    var toAccountBalance = BigDecimal.ZERO;
+    var firstAmount = BigDecimal.valueOf(600_000L);
+    var secondAmount = BigDecimal.valueOf(500_000L);
+
+    var fromAccount = fixtures.createAccountWithBalance(memberId, "출금", fromAccountBalance);
+    var toAccount = fixtures.createAccountWithBalance(memberId, "입금", toAccountBalance);
+
+    var firstKey = issueIdempotencyKey(result.auth().accessToken());
+    var firstResponse = transfer(
+        result.auth().accessToken(),
+        firstKey,
+        fromAccount.accountId(),
+        toAccount.accountId(),
+        firstAmount
+    );
+
+    assertTransferSucceeded(firstResponse);
+    assertBalance(fromAccount.accountId(), BigDecimal.valueOf(1_400_000L));
+    assertBalance(toAccount.accountId(), BigDecimal.valueOf(600_000L));
+
+    var secondKey = issueIdempotencyKey(result.auth().accessToken());
+
+    var transferCountBefore = fixtures.countTransfers();
+    var outboxCountBefore = fixtures.countOutboxEvents();
+    var ledgerCountBefore = fixtures.countLedgers();
+
+    var secondResponse = transfer(
+        result.auth().accessToken(),
+        secondKey,
+        fromAccount.accountId(),
+        toAccount.accountId(),
+        secondAmount
+    );
+
+    assertThat(secondResponse.status()).isEqualTo("FAILED");
+    assertThat(secondResponse.transferId()).isNull();
+    assertThat(secondResponse.errorCode()).isEqualTo("DAILY_LIMIT_EXCEEDED");
+    assertBalance(fromAccount.accountId(), BigDecimal.valueOf(1_400_000L));
+    assertBalance(toAccount.accountId(), BigDecimal.valueOf(600_000L));
+
+    assertThat(fixtures.countTransfers()).isEqualTo(transferCountBefore);
+    assertThat(fixtures.countOutboxEvents()).isEqualTo(outboxCountBefore);
+    assertThat(fixtures.countLedgers()).isEqualTo(ledgerCountBefore);
+
+    var idempotency = fixtures.loadIdempotencyKey(memberId, secondKey);
+    assertThat(idempotency.status()).isEqualTo("FAILED");
+    assertThat(idempotency.responseSnapshot()).contains("FAILED", "DAILY_LIMIT_EXCEEDED");
+  }
+
+  @Test
   void shouldFailAfterIdempotencyTimeoutAndWatchdog() {
     // Arrange
     var result = fixtures.setupAuthentication();
