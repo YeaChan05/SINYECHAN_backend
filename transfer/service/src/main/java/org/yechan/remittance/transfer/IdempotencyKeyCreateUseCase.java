@@ -13,6 +13,8 @@ public interface IdempotencyKeyCreateUseCase {
 interface IdempotencyKeyCreateProps {
 
   long memberId();
+
+  IdempotencyKeyProps.IdempotencyScopeValue scope();
 }
 
 record IdempotencyKeyService(
@@ -58,7 +60,7 @@ record IdempotencyKeyService(
 
     @Override
     public IdempotencyScopeValue scope() {
-      return IdempotencyScopeValue.TRANSFER;
+      return props.scope();
     }
 
     @Override
