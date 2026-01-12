@@ -3,7 +3,7 @@ package org.yechan.remittance.transfer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("transfer.outbox")
-class TransferOutboxProperties {
+public class TransferOutboxProperties {
 
   private int batchSize = 100;
   private long publishDelayMs = 1000;
