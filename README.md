@@ -8,6 +8,7 @@
 - [모듈 구조](docs/rule/module.md)
 - [의존성 규칙](docs/rule/dependencies.md)
 - [외부 라이브러리|오픈소스](docs/opensource.md)
+- [API 문서](docs/api)
 
 ## API 요약
 
