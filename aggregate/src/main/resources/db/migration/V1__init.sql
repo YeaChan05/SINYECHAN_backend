@@ -71,7 +71,7 @@ create table integration.idempotency_key
     idempotency_key   varchar(255)      not null,
     request_hash      varchar(255),
     response_snapshot varchar(255),
-    scope             enum ('TRANSFER') not null,
+    scope             enum ('TRANSFER','DEPOSIT','WITHDRAW') not null,
     status            enum ('BEFORE_START','FAILED','IN_PROGRESS','SUCCEEDED','TIMEOUT'),
     primary key (id)
 ) engine = InnoDB;
