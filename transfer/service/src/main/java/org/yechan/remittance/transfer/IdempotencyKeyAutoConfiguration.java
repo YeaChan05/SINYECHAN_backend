@@ -15,6 +15,6 @@ class IdempotencyKeyAutoConfiguration {
       Clock idempotencyKeyClock,
       IdempotencyKeyProperties properties
   ) {
-    return new IdempotencyKeyService(repository, idempotencyKeyClock, properties);
+    return new IdempotencyKeyService(repository, idempotencyKeyClock, properties.expiresIn());
   }
 }

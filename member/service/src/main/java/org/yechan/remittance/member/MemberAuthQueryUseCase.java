@@ -8,16 +8,10 @@ public interface MemberAuthQueryUseCase {
 }
 
 
-class MemberAuthQueryService implements MemberAuthQueryUseCase {
-
-  private final MemberRepository memberRepository;
-  private final PasswordHashEncoder passwordHashEncoder;
-
-  public MemberAuthQueryService(MemberRepository memberRepository,
-      PasswordHashEncoder passwordHashEncoder) {
-    this.memberRepository = memberRepository;
-    this.passwordHashEncoder = passwordHashEncoder;
-  }
+record MemberAuthQueryService(
+    MemberRepository memberRepository,
+    PasswordHashEncoder passwordHashEncoder
+) implements MemberAuthQueryUseCase {
 
   @Override
   public MemberAuthValue verify(MemberLoginProps props) {

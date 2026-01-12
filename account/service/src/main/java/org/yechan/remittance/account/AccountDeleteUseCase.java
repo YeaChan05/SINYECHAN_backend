@@ -6,13 +6,9 @@ public interface AccountDeleteUseCase {
 }
 
 
-class AccountDeleteService implements AccountDeleteUseCase {
-
-  private final AccountRepository accountRepository;
-
-  AccountDeleteService(AccountRepository accountRepository) {
-    this.accountRepository = accountRepository;
-  }
+record AccountDeleteService(
+    AccountRepository accountRepository
+) implements AccountDeleteUseCase {
 
   @Override
   public AccountModel delete(AccountDeleteProps props) {

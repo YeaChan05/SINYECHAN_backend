@@ -9,15 +9,11 @@ public interface AuthLoginUseCase {
 }
 
 
-class AuthService implements AuthLoginUseCase {
+record AuthService(
+    MemberAuthClient memberAuthClient,
+    TokenGenerator tokenGenerator
+) implements AuthLoginUseCase {
 
-  private final MemberAuthClient memberAuthClient;
-  private final TokenGenerator tokenGenerator;
-
-  public AuthService(MemberAuthClient memberAuthClient, TokenGenerator tokenGenerator) {
-    this.memberAuthClient = memberAuthClient;
-    this.tokenGenerator = tokenGenerator;
-  }
 
   @Override
   public AuthTokenValue login(AuthLoginProps props) {

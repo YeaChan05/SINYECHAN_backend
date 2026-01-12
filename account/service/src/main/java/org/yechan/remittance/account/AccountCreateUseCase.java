@@ -6,13 +6,9 @@ public interface AccountCreateUseCase {
 }
 
 
-class AccountService implements AccountCreateUseCase {
-
-  private final AccountRepository accountRepository;
-
-  AccountService(AccountRepository accountRepository) {
-    this.accountRepository = accountRepository;
-  }
+record AccountService(
+    AccountRepository accountRepository
+) implements AccountCreateUseCase {
 
   @Override
   public AccountModel create(AccountProps props) {

@@ -8,15 +8,10 @@ public interface MemberCreateUseCase {
 }
 
 
-class MemberService implements MemberCreateUseCase {
-
-  private final MemberRepository memberRepository;
-  private final PasswordHashEncoder passwordHashEncoder;
-
-  public MemberService(MemberRepository memberRepository, PasswordHashEncoder passwordHashEncoder) {
-    this.memberRepository = memberRepository;
-    this.passwordHashEncoder = passwordHashEncoder;
-  }
+record MemberService(
+    MemberRepository memberRepository,
+    PasswordHashEncoder passwordHashEncoder
+) implements MemberCreateUseCase {
 
   @Override
   public MemberModel register(MemberProps props) {

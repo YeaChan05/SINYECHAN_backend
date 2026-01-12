@@ -11,19 +11,11 @@ public interface MemberQueryUseCase {
 }
 
 
-class MemberQueryService implements MemberQueryUseCase {
-
-  private final MemberRepository memberRepository;
-  private final PasswordHashEncoder passwordHashEncoder;
-  private final TokenGenerator tokenGenerator;
-
-  public MemberQueryService(MemberRepository memberRepository,
-      PasswordHashEncoder passwordHashEncoder,
-      TokenGenerator tokenGenerator) {
-    this.memberRepository = memberRepository;
-    this.passwordHashEncoder = passwordHashEncoder;
-    this.tokenGenerator = tokenGenerator;
-  }
+record MemberQueryService(
+    MemberRepository memberRepository,
+    PasswordHashEncoder passwordHashEncoder,
+    TokenGenerator tokenGenerator
+) implements MemberQueryUseCase {
 
   @Override
   public MemberTokenValue login(MemberLoginProps props) {

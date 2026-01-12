@@ -11,24 +11,12 @@ public interface TransferCreateUseCase {
   TransferResult transfer(Long memberId, String idempotencyKey, TransferRequestProps props);
 }
 
-class TransferService implements TransferCreateUseCase {
-
-  private final TransferIdempotencyHandler idempotencyHandler;
-  private final TransferProcessService transferProcessService;
-  private final LedgerWriter ledgerWriter;
-  private final Clock clock;
-
-  TransferService(
-      TransferIdempotencyHandler idempotencyHandler,
-      TransferProcessService transferProcessService,
-      LedgerWriter ledgerWriter,
-      Clock clock
-  ) {
-    this.idempotencyHandler = idempotencyHandler;
-    this.transferProcessService = transferProcessService;
-    this.ledgerWriter = ledgerWriter;
-    this.clock = clock;
-  }
+record TransferService(
+    TransferIdempotencyHandler idempotencyHandler,
+    TransferProcessService transferProcessService,
+    LedgerWriter ledgerWriter,
+    Clock clock
+) implements TransferCreateUseCase {
 
   @Override
   public TransferResult transfer(Long memberId, String idempotencyKey, TransferRequestProps props) {

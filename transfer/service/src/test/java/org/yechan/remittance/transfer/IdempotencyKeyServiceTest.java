@@ -21,7 +21,7 @@ class IdempotencyKeyServiceTest {
     LocalDateTime now = LocalDateTime.parse("2026-01-01T00:00:00");
     Clock clock = Clock.fixed(now.toInstant(ZoneOffset.UTC), ZoneOffset.UTC);
     var properties = new IdempotencyKeyProperties(Duration.ofHours(1));
-    var service = new IdempotencyKeyService(repository, clock, properties);
+    var service = new IdempotencyKeyService(repository, clock, properties.expiresIn());
 
     IdempotencyKeyModel created = service.create(() -> 10L);
 

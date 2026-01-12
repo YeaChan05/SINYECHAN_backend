@@ -15,25 +15,11 @@ interface IdempotencyKeyCreateProps {
   long memberId();
 }
 
-class IdempotencyKeyService implements IdempotencyKeyCreateUseCase {
-
-  private final IdempotencyKeyRepository repository;
-  private final Clock clock;
-  private final Duration expiresIn;
-
-  IdempotencyKeyService(
-      IdempotencyKeyRepository repository,
-      Clock clock,
-      IdempotencyKeyProperties properties
-  ) {
-    this(repository, clock, properties.expiresIn());
-  }
-
-  IdempotencyKeyService(IdempotencyKeyRepository repository, Clock clock, Duration expiresIn) {
-    this.repository = repository;
-    this.clock = clock;
-    this.expiresIn = expiresIn;
-  }
+record IdempotencyKeyService(
+    IdempotencyKeyRepository repository,
+    Clock clock,
+    Duration expiresIn
+) implements IdempotencyKeyCreateUseCase {
 
   @Override
   public IdempotencyKeyModel create(IdempotencyKeyCreateProps props) {
