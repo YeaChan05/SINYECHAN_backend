@@ -3,6 +3,7 @@ package org.yechan.remittance.api.transfer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,15 +30,19 @@ import org.yechan.remittance.TransferTestFixturesConfig;
 import org.yechan.remittance.account.AccountIdentifier;
 import org.yechan.remittance.transfer.TransferIdentifier;
 import org.yechan.remittance.transfer.TransferModel;
+import org.yechan.remittance.transfer.TransferProps.TransferScopeValue;
 import org.yechan.remittance.transfer.TransferQueryCondition;
 import org.yechan.remittance.transfer.TransferRepository;
 import org.yechan.remittance.transfer.TransferRequestProps;
 import org.yechan.remittance.transfer.dto.IdempotencyKeyCreateResponse;
 import org.yechan.remittance.transfer.dto.TransferRequest;
+import org.yechan.remittance.transfer.dto.WithdrawalRequest;
 
 @SpringBootTest(classes = AggregateApplication.class)
 @Import({TransferTestFixturesConfig.class, PostSpecs.TransferFailureConfig.class})
 public class PostSpecs extends TestContainerSetup {
+
+  private static final BigDecimal TRANSFER_FEE_RATE = new BigDecimal("0.01");
 
   @Autowired
   RestTestClient restTestClient;
@@ -68,6 +73,7 @@ public class PostSpecs extends TestContainerSetup {
     var fromAccountBalance = BigDecimal.valueOf(100000L);
     var toAccountBalance = BigDecimal.valueOf(50000L);
     var transferAmount = BigDecimal.valueOf(30000L);
+    var fee = feeFor(transferAmount);
 
     var fromAccount = fixtures.createAccountWithBalance(memberId, "출금", fromAccountBalance);
     var toAccount = fixtures.createAccountWithBalance(memberId, "입금", toAccountBalance);
@@ -88,10 +94,12 @@ public class PostSpecs extends TestContainerSetup {
 
     // Assert
     assertTransferSucceeded(response);
-    assertBalance(fromAccount.accountId(), BigDecimal.valueOf(70000L));
+    assertBalance(fromAccount.accountId(), BigDecimal.valueOf(100000L)
+        .subtract(transferAmount)
+        .subtract(fee));
     assertBalance(toAccount.accountId(), BigDecimal.valueOf(80000L));
     assertLedgers(response.transferId(), fromAccount.accountId(), toAccount.accountId(),
-        transferAmount, before, after);
+        transferAmount.add(fee), transferAmount, before, after);
     assertOutbox(response.transferId(), fromAccount.accountId(), toAccount.accountId(),
         transferAmount);
     assertIdempotency(memberId, idempotencyKey);
@@ -110,6 +118,7 @@ public class PostSpecs extends TestContainerSetup {
     var fromAccount = fixtures.createAccountWithBalance(memberId, "출금", fromAccountBalance);
     var toAccount = fixtures.createAccountWithBalance(memberId, "입금", toAccountBalance);
     var idempotencyKey = issueIdempotencyKey(result.auth().accessToken());
+    var fee = feeFor(transferAmount);
 
     // Act
     var firstResponse = transfer(
@@ -121,7 +130,9 @@ public class PostSpecs extends TestContainerSetup {
     );
 
     assertTransferSucceeded(firstResponse);
-    assertBalance(fromAccount.accountId(), BigDecimal.valueOf(70000L));
+    assertBalance(fromAccount.accountId(), fromAccountBalance
+        .subtract(transferAmount)
+        .subtract(fee));
     assertBalance(toAccount.accountId(), BigDecimal.valueOf(80000L));
 
     var firstSnapshot = fixtures.loadIdempotencyKey(memberId, idempotencyKey).responseSnapshot();
@@ -140,7 +151,9 @@ public class PostSpecs extends TestContainerSetup {
     assertThat(secondResponse.status()).isEqualTo("SUCCEEDED");
     assertThat(secondResponse.transferId()).isEqualTo(firstResponse.transferId());
     assertThat(secondResponse.errorCode()).isNull();
-    assertBalance(fromAccount.accountId(), BigDecimal.valueOf(70000L));
+    assertBalance(fromAccount.accountId(), fromAccountBalance
+        .subtract(transferAmount)
+        .subtract(fee));
     assertBalance(toAccount.accountId(), BigDecimal.valueOf(80000L));
 
     var secondSnapshot = fixtures.loadIdempotencyKey(memberId, idempotencyKey).responseSnapshot();
@@ -162,6 +175,7 @@ public class PostSpecs extends TestContainerSetup {
     var toAccountBalance = BigDecimal.valueOf(50000L);
     var transferAmount = BigDecimal.valueOf(30000L);
     var differentAmount = BigDecimal.valueOf(10000L);
+    var fee = feeFor(transferAmount);
 
     var fromAccount = fixtures.createAccountWithBalance(memberId, "출금", fromAccountBalance);
     var toAccount = fixtures.createAccountWithBalance(memberId, "입금", toAccountBalance);
@@ -176,7 +190,9 @@ public class PostSpecs extends TestContainerSetup {
     );
 
     assertTransferSucceeded(firstResponse);
-    assertBalance(fromAccount.accountId(), BigDecimal.valueOf(70000L));
+    assertBalance(fromAccount.accountId(), fromAccountBalance
+        .subtract(transferAmount)
+        .subtract(fee));
     assertBalance(toAccount.accountId(), BigDecimal.valueOf(80000L));
 
     var firstSnapshot = fixtures.loadIdempotencyKey(memberId, idempotencyKey).responseSnapshot();
@@ -198,7 +214,9 @@ public class PostSpecs extends TestContainerSetup {
         // Assert
         .expectStatus().isBadRequest();
 
-    assertBalance(fromAccount.accountId(), BigDecimal.valueOf(70000L));
+    assertBalance(fromAccount.accountId(), fromAccountBalance
+        .subtract(transferAmount)
+        .subtract(fee));
     assertBalance(toAccount.accountId(), BigDecimal.valueOf(80000L));
 
     var secondSnapshot = fixtures.loadIdempotencyKey(memberId, idempotencyKey).responseSnapshot();
@@ -299,10 +317,11 @@ public class PostSpecs extends TestContainerSetup {
     var result = fixtures.setupAuthentication();
 
     var memberId = Long.parseLong(result.authentication().getName());
-    var fromAccountBalance = BigDecimal.valueOf(2_000_000L);
+    var fromAccountBalance = BigDecimal.valueOf(10_000_000L);
     var toAccountBalance = BigDecimal.ZERO;
-    var firstAmount = BigDecimal.valueOf(600_000L);
-    var secondAmount = BigDecimal.valueOf(500_000L);
+    var firstAmount = BigDecimal.valueOf(2_000_000L);
+    var secondAmount = BigDecimal.valueOf(1_200_000L);
+    var firstFee = feeFor(firstAmount);
 
     var fromAccount = fixtures.createAccountWithBalance(memberId, "출금", fromAccountBalance);
     var toAccount = fixtures.createAccountWithBalance(memberId, "입금", toAccountBalance);
@@ -317,8 +336,10 @@ public class PostSpecs extends TestContainerSetup {
     );
 
     assertTransferSucceeded(firstResponse);
-    assertBalance(fromAccount.accountId(), BigDecimal.valueOf(1_400_000L));
-    assertBalance(toAccount.accountId(), BigDecimal.valueOf(600_000L));
+    assertBalance(fromAccount.accountId(), fromAccountBalance
+        .subtract(firstAmount)
+        .subtract(firstFee));
+    assertBalance(toAccount.accountId(), firstAmount);
 
     var secondKey = issueIdempotencyKey(result.auth().accessToken());
 
@@ -337,8 +358,59 @@ public class PostSpecs extends TestContainerSetup {
     assertThat(secondResponse.status()).isEqualTo("FAILED");
     assertThat(secondResponse.transferId()).isNull();
     assertThat(secondResponse.errorCode()).isEqualTo("DAILY_LIMIT_EXCEEDED");
-    assertBalance(fromAccount.accountId(), BigDecimal.valueOf(1_400_000L));
-    assertBalance(toAccount.accountId(), BigDecimal.valueOf(600_000L));
+    assertBalance(fromAccount.accountId(), fromAccountBalance
+        .subtract(firstAmount)
+        .subtract(firstFee));
+    assertBalance(toAccount.accountId(), firstAmount);
+
+    assertThat(fixtures.countTransfers()).isEqualTo(transferCountBefore);
+    assertThat(fixtures.countOutboxEvents()).isEqualTo(outboxCountBefore);
+    assertThat(fixtures.countLedgers()).isEqualTo(ledgerCountBefore);
+
+    var idempotency = fixtures.loadIdempotencyKey(memberId, secondKey);
+    assertThat(idempotency.status()).isEqualTo("FAILED");
+    assertThat(idempotency.responseSnapshot()).contains("FAILED", "DAILY_LIMIT_EXCEEDED");
+  }
+
+  @Test
+  void shouldFailWhenWithdrawalDailyLimitExceeded() {
+    var result = fixtures.setupAuthentication();
+
+    var memberId = Long.parseLong(result.authentication().getName());
+    var fromAccountBalance = BigDecimal.valueOf(2_000_000L);
+    var firstAmount = BigDecimal.valueOf(600_000L);
+    var secondAmount = BigDecimal.valueOf(500_000L);
+
+    var fromAccount = fixtures.createAccountWithBalance(memberId, "출금", fromAccountBalance);
+    var firstKey = issueIdempotencyKey(result.auth().accessToken());
+
+    var firstResponse = withdraw(
+        result.auth().accessToken(),
+        firstKey,
+        fromAccount.accountId(),
+        firstAmount
+    );
+
+    assertTransferSucceeded(firstResponse);
+    assertBalance(fromAccount.accountId(), fromAccountBalance.subtract(firstAmount));
+
+    var secondKey = issueIdempotencyKey(result.auth().accessToken());
+
+    var transferCountBefore = fixtures.countTransfers();
+    var outboxCountBefore = fixtures.countOutboxEvents();
+    var ledgerCountBefore = fixtures.countLedgers();
+
+    var secondResponse = withdraw(
+        result.auth().accessToken(),
+        secondKey,
+        fromAccount.accountId(),
+        secondAmount
+    );
+
+    assertThat(secondResponse.status()).isEqualTo("FAILED");
+    assertThat(secondResponse.transferId()).isNull();
+    assertThat(secondResponse.errorCode()).isEqualTo("DAILY_LIMIT_EXCEEDED");
+    assertBalance(fromAccount.accountId(), fromAccountBalance.subtract(firstAmount));
 
     assertThat(fixtures.countTransfers()).isEqualTo(transferCountBefore);
     assertThat(fixtures.countOutboxEvents()).isEqualTo(outboxCountBefore);
@@ -595,6 +667,35 @@ public class PostSpecs extends TestContainerSetup {
     return response;
   }
 
+  private TransferResponse withdraw(
+      String accessToken,
+      String idempotencyKey,
+      Long accountId,
+      BigDecimal amount
+  ) {
+    var response = restTestClient.post()
+        .uri(uriBuilder -> uriBuilder.path("/withdrawals/" + idempotencyKey)
+            .build())
+        .body(new WithdrawalRequest(accountId, amount))
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody(TransferResponse.class)
+        .returnResult()
+        .getResponseBody();
+
+    if (response == null) {
+      throw new IllegalStateException("Withdrawal response is null");
+    }
+
+    return response;
+  }
+
+  private BigDecimal feeFor(BigDecimal amount) {
+    return amount.multiply(TRANSFER_FEE_RATE).setScale(2, RoundingMode.DOWN);
+  }
+
   private void assertLedger(
       List<LedgerRow> ledgers,
       Long accountId,
@@ -628,14 +729,15 @@ public class PostSpecs extends TestContainerSetup {
       Long transferId,
       Long fromAccountId,
       Long toAccountId,
-      BigDecimal amount,
+      BigDecimal debitAmount,
+      BigDecimal creditAmount,
       LocalDateTime before,
       LocalDateTime after
   ) {
     var ledgers = fixtures.loadLedgers(transferId);
     assertThat(ledgers).hasSize(2);
-    assertLedger(ledgers, fromAccountId, "DEBIT", amount, before, after);
-    assertLedger(ledgers, toAccountId, "CREDIT", amount, before, after);
+    assertLedger(ledgers, fromAccountId, "DEBIT", debitAmount, before, after);
+    assertLedger(ledgers, toAccountId, "CREDIT", creditAmount, before, after);
   }
 
   private void assertOutbox(
@@ -723,6 +825,12 @@ public class PostSpecs extends TestContainerSetup {
         TransferQueryCondition condition
     ) {
       return delegate.findCompletedByAccountId(identifier, condition);
+    }
+
+    @Override
+    public BigDecimal sumAmountByFromAccountIdAndScopeBetween(AccountIdentifier identifier,
+        TransferScopeValue scope, LocalDateTime from, LocalDateTime to) {
+      return delegate.sumAmountByFromAccountIdAndScopeBetween(identifier, scope, from, to);
     }
   }
 }
