@@ -13,12 +13,18 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: create
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui/index.html
 management:
+
   endpoints:
     web:
       exposure:

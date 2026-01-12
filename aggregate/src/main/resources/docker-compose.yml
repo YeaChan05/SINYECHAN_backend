@@ -14,7 +14,11 @@ services:
 
   rabbitmq:
     container_name: rabbitmq-aggregate
-    image: rabbitmq:3.8.19
+    image: rabbitmq:3.13-management
     ports:
       - "5672:5672"
       - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+
