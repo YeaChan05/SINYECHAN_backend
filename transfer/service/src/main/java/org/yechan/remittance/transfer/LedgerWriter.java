@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.yechan.remittance.transfer.LedgerProps.LedgerSideValue;
+import org.yechan.remittance.transfer.TransferProps.TransferScopeValue;
 
 public class LedgerWriter {
 
@@ -19,10 +20,24 @@ public class LedgerWriter {
     if (result.transferId() == null) {
       return;
     }
-    saveLedgerIfAbsent(result.transferId(), props.fromAccountId(), props.amount(),
-        LedgerSideValue.DEBIT, now);
-    saveLedgerIfAbsent(result.transferId(), props.toAccountId(), props.amount(),
-        LedgerSideValue.CREDIT, now);
+    BigDecimal debitAmount = props.amount().add(props.fee());
+    saveLedgerIfAbsent(
+        result.transferId(),
+        props.fromAccountId(),
+        debitAmount,
+        LedgerSideValue.DEBIT,
+        now
+    );
+
+    if (props.scope() == TransferScopeValue.TRANSFER) {
+      saveLedgerIfAbsent(
+          result.transferId(),
+          props.toAccountId(),
+          props.amount(),
+          LedgerSideValue.CREDIT,
+          now
+      );
+    }
   }
 
   private void saveLedgerIfAbsent(
