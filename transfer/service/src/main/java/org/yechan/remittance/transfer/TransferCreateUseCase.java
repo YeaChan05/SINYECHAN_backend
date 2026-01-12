@@ -1,6 +1,5 @@
 package org.yechan.remittance.transfer;
 
-import static org.yechan.remittance.transfer.IdempotencyKeyProps.IdempotencyScopeValue.TRANSFER;
 import static org.yechan.remittance.transfer.TransferSnapshotUtil.hashRequest;
 
 import java.time.Clock;
@@ -21,7 +20,8 @@ record TransferService(
   @Override
   public TransferResult transfer(Long memberId, String idempotencyKey, TransferRequestProps props) {
     LocalDateTime now = LocalDateTime.now(clock);
-    var key = idempotencyHandler.loadKey(memberId, idempotencyKey, TRANSFER, now);
+    var scope = toIdempotencyScope(props.scope());
+    var key = idempotencyHandler.loadKey(memberId, idempotencyKey, scope, now);
     var requestHash = hashRequest(props);
 
     idempotencyHandler.validateRequestHash(key, requestHash);
@@ -29,13 +29,13 @@ record TransferService(
     boolean marked = idempotencyHandler.markInProgress(
         memberId,
         idempotencyKey,
-        TRANSFER,
+        scope,
         requestHash,
         now
     );
 
     if (!marked) {
-      return idempotencyHandler.resolveExisting(memberId, idempotencyKey, TRANSFER, requestHash);
+      return idempotencyHandler.resolveExisting(memberId, idempotencyKey, scope, requestHash);
     }
 
     TransferResult result;
@@ -43,7 +43,7 @@ record TransferService(
       result = transferProcessService.process(memberId, idempotencyKey, props, now);
     } catch (TransferFailedException ex) {
       TransferResult failed = TransferResult.failed(ex.getFailureCode());
-      idempotencyHandler.markFailed(memberId, idempotencyKey, TRANSFER, failed, now);
+      idempotencyHandler.markFailed(memberId, idempotencyKey, scope, failed, now);
       return failed;
     }
 
@@ -54,5 +54,16 @@ record TransferService(
     }
 
     return result;
+  }
+
+  private IdempotencyKeyProps.IdempotencyScopeValue toIdempotencyScope(
+      TransferProps.TransferScopeValue scope
+  ) {
+    return switch (scope) {
+      case TRANSFER -> IdempotencyKeyProps.IdempotencyScopeValue.TRANSFER;
+      case WITHDRAW -> IdempotencyKeyProps.IdempotencyScopeValue.WITHDRAW;
+      case DEPOSIT -> IdempotencyKeyProps.IdempotencyScopeValue.DEPOSIT;
+      default -> IdempotencyKeyProps.IdempotencyScopeValue.TRANSFER;
+    };
   }
 }

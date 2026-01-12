@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import org.springframework.transaction.annotation.Transactional;
 import org.yechan.remittance.account.AccountModel;
 import org.yechan.remittance.account.AccountRepository;
-import org.yechan.remittance.transfer.IdempotencyKeyProps.IdempotencyScopeValue;
 import org.yechan.remittance.transfer.TransferProps.TransferScopeValue;
 
 class TransferProcessService {
@@ -154,7 +153,7 @@ class TransferProcessService {
     TransferResult result = TransferResult.succeeded(transfer.transferId());
     idempotencyKeyRepository.markSucceeded(
         memberId,
-        IdempotencyScopeValue.TRANSFER,
+        toIdempotencyScope(props.scope()),
         idempotencyKey,
         toSnapshot(result),
         now
@@ -197,5 +196,16 @@ class TransferProcessService {
 
   private record AccountPair(AccountModel fromAccount, AccountModel toAccount) {
 
+  }
+
+  private IdempotencyKeyProps.IdempotencyScopeValue toIdempotencyScope(
+      TransferScopeValue scope
+  ) {
+    return switch (scope) {
+      case TRANSFER -> IdempotencyKeyProps.IdempotencyScopeValue.TRANSFER;
+      case WITHDRAW -> IdempotencyKeyProps.IdempotencyScopeValue.WITHDRAW;
+      case DEPOSIT -> IdempotencyKeyProps.IdempotencyScopeValue.DEPOSIT;
+      default -> IdempotencyKeyProps.IdempotencyScopeValue.TRANSFER;
+    };
   }
 }
