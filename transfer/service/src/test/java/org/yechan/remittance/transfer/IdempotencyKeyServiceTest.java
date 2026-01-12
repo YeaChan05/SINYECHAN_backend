@@ -23,7 +23,17 @@ class IdempotencyKeyServiceTest {
     var properties = new IdempotencyKeyProperties(Duration.ofHours(1));
     var service = new IdempotencyKeyService(repository, clock, properties.expiresIn());
 
-    IdempotencyKeyModel created = service.create(() -> 10L);
+    IdempotencyKeyModel created = service.create(new IdempotencyKeyCreateProps() {
+      @Override
+      public long memberId() {
+        return 10L;
+      }
+
+      @Override
+      public IdempotencyScopeValue scope() {
+        return IdempotencyScopeValue.TRANSFER;
+      }
+    });
 
     assertThat(created.memberId()).isEqualTo(10L);
     assertThat(created.idempotencyKey()).isNotBlank();
