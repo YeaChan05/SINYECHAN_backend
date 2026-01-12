@@ -122,6 +122,12 @@ class TransferProcessService {
   }
 
   private void updateBalances(TransferRequestProps props, AccountPair accounts) {
+    if (props.scope() == TransferScopeValue.DEPOSIT) {
+      BigDecimal updatedToBalance = accounts.toAccount().balance().add(props.amount());
+      accountRepository.updateBalance(() -> accounts.toAccount().accountId(), updatedToBalance);
+      return;
+    }
+
     BigDecimal debitAmount = props.amount().add(props.fee());
     BigDecimal updatedFromBalance = accounts.fromAccount().balance().subtract(debitAmount);
     accountRepository.updateBalance(() -> accounts.fromAccount().accountId(), updatedFromBalance);
